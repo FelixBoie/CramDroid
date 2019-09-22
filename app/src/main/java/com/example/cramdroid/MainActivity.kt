@@ -9,14 +9,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import classes.NotifIntentService
-import classes.NotifService
 import java.util.*
 import kotlin.concurrent.timerTask
 import android.app.*
 import android.os.SystemClock
 import classes.MyNotificationPublisher
 import android.R.drawable.ic_dialog_alert
+import android.graphics.Color
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,11 +35,6 @@ class MainActivity : AppCompatActivity() {
 
     fun settingsPress(view: View) {
         scheduleNotification(getNotification("This is Strange"), 20000)
-        /*Intent(this, NotifService::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }.also {
-            intent ->  sendBroadcast(intent)
-        }*/
     }
     private fun scheduleNotification(notification: Notification, delay: Int) {
         val notificationIntent = Intent(this, MyNotificationPublisher::class.java)
@@ -69,31 +63,13 @@ class MainActivity : AppCompatActivity() {
         builder.setContentTitle("Scheduled Notification")
         builder.setContentText(content)
         builder.setSmallIcon(ic_dialog_alert)
+        builder.setLights(Color.argb(100, 255, 0, 255), 1000, 200)
         builder.setAutoCancel(true)
         builder.setContentIntent(pendingIntent)
         builder.setChannelId(NOTIFICATION_CHANNEL_ID)
         println("built")
         return builder.build()
     }
-
-    private fun createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "That Name"
-            val descriptionText = "CHannel Description"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel("Penis", name, importance).apply {
-                description = descriptionText
-            }
-            channel.enableLights(true)
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
 
 }
 

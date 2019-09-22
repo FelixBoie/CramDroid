@@ -29,19 +29,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name="classes.NotifIntentService"
-            android:process=":notifyme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </service>
-        <service android:name="classes.NotifService"
-            android:process=":whocaresreally"
-            android:enabled="true"
-            android:exported="true">
-        </service>
         <receiver android:name="classes.MyNotificationPublisher">
         </receiver>
 
