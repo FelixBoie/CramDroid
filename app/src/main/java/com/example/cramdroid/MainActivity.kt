@@ -1,28 +1,32 @@
 package com.example.cramdroid
 
-import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Color.argb
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import classes.NotifIntentService
+import classes.NotifService
+import java.util.*
+import kotlin.concurrent.timerTask
+import android.app.*
+import android.os.SystemClock
+import classes.MyNotificationPublisher
+import android.R.drawable.ic_dialog_alert
+
 
 class MainActivity : AppCompatActivity() {
+    public val NOTIFICATION_CHANNEL_ID = "10001"
+    private val default_notification_channel_id = "Penis"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        createNotificationChannel()
+        //createNotificationChannel()
     }
 
     fun openTaskChoice(view: View) {
@@ -31,26 +35,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun settingsPress(view: View) {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        scheduleNotification(getNotification("This is Strange"), 20000)
+        /*Intent(this, NotifService::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+        }.also {
+            intent ->  sendBroadcast(intent)
+        }*/
+    }
+    private fun scheduleNotification(notification: Notification, delay: Int) {
+        val notificationIntent = Intent(this, MyNotificationPublisher::class.java)
+        notificationIntent.putExtra(MyNotificationPublisher.NOTIFICATION_ID, 1)
+        notificationIntent.putExtra(MyNotificationPublisher.NOTIFICATION, notification)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val futureInMillis = SystemClock.elapsedRealtime() + delay
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        println("Scheduling...")
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
+    }
 
-        val builder = NotificationCompat.Builder(this, "Penis")
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle("A perfect time to study!")
-            .setContentText("Hey, knowledge is awaiting you!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setLights(argb(100, 255, 0, 255), 1000, 200)
-            // Set the intent that will fire when the user taps the notification
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
+    private fun getNotification(content: String): Notification {
 
-        with(NotificationManagerCompat.from(this)) {
-            createNotificationChannel()
-            // notificationId is a unique int for each notification that you must define
-            notify(1, builder.build())
-        }
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
+
+        val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        builder.setContentTitle("Scheduled Notification")
+        builder.setContentText(content)
+        builder.setSmallIcon(ic_dialog_alert)
+        builder.setAutoCancel(true)
+        builder.setContentIntent(pendingIntent)
+        builder.setChannelId(NOTIFICATION_CHANNEL_ID)
+        println("built")
+        return builder.build()
     }
 
     private fun createNotificationChannel() {
@@ -63,6 +86,7 @@ class MainActivity : AppCompatActivity() {
             val channel = NotificationChannel("Penis", name, importance).apply {
                 description = descriptionText
             }
+            channel.enableLights(true)
             // Register the channel with the system
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
