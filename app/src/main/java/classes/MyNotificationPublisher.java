@@ -6,6 +6,8 @@ import android.app.NotificationManager ;
 import android.content.BroadcastReceiver ;
 import android.content.Context ;
 import android.content.Intent ;
+import android.graphics.Color;
+
 public class MyNotificationPublisher extends BroadcastReceiver {
     public static String NOTIFICATION_ID = "notification-id" ;
     public static String NOTIFICATION = "notification" ;
@@ -16,6 +18,7 @@ public class MyNotificationPublisher extends BroadcastReceiver {
             int importance = NotificationManager. IMPORTANCE_HIGH ;
             NotificationChannel notificationChannel = new NotificationChannel( "10001" , "NOTIFICATION_CHANNEL_NAME" , importance) ;
             notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.MAGENTA);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(notificationChannel) ;
         }

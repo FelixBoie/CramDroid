@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun settingsPress(view: View) {
-        scheduleNotification(getNotification("This is Strange"), 20000)
+        scheduleNotification(getNotification("This would be a perfect time to study!"), 20000)
     }
     private fun scheduleNotification(notification: Notification, delay: Int) {
         val notificationIntent = Intent(this, MyNotificationPublisher::class.java)
@@ -60,10 +60,10 @@ class MainActivity : AppCompatActivity() {
         val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
 
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        builder.setContentTitle("Scheduled Notification")
+        builder.setContentTitle("Studytime!")
         builder.setContentText(content)
         builder.setSmallIcon(ic_dialog_alert)
-        builder.setLights(Color.argb(100, 255, 0, 255), 1000, 200)
+        builder.setLights(Color.MAGENTA, 1000, 200)
         builder.setAutoCancel(true)
         builder.setContentIntent(pendingIntent)
         builder.setChannelId(NOTIFICATION_CHANNEL_ID)
