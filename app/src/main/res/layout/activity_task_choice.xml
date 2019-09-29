@@ -52,4 +52,16 @@
         android:text="Start"
         app:layout_constraintBaseline_toBaselineOf="@+id/recomm_item_lab"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/others_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="55dp"
+        android:text="@string/others_lab"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/start_recommended_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

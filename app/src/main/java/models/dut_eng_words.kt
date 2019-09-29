@@ -2,8 +2,8 @@ package models
 
 import classes.Word
 
-fun loadDutEngWords(): List<Word> {
-    return listOf(
+fun loadDutEngWords(): MutableList<Word> {
+    return mutableListOf(
         Word("rain", "regen"),
         Word("headset","hoofdtelefoon"),
         Word("doctor","arts"),

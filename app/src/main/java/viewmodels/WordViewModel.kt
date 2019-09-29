@@ -9,7 +9,6 @@ import classes.Word
 import com.example.cramdroid.R
 import models.csvListSplitter
 import java.io.File
-import com.opencsv.CSVReader
 import models.loadDutEngWords
 import java.io.FileInputStream
 import java.io.FileReader
@@ -17,19 +16,19 @@ import kotlin.random.Random
 
 
 class WordViewModel: ViewModel() {
-    private val words: MutableLiveData<List<Word>> by lazy {
-        MutableLiveData<List<Word>>().also{
+    /*private val words: MutableLiveData<MutableList<Word>> by lazy {
+        MutableLiveData<MutableList<Word>>().also{
             loadWords()
         }
-    }
+    }*/
 
+    val words = loadWords()
 
-
-    fun getWords(): LiveData<List<Word>> {
+    /*fun getWords(): LiveData<MutableList<Word>> {
         return words
-    }
+    }*/
 
-    private fun loadWords(): List<Word> {
+    private fun loadWords(): MutableList<Word> {
         return loadDutEngWords()
     }
 
@@ -41,8 +40,13 @@ class WordViewModel: ViewModel() {
 
     }
 
+    fun updateWordList() {
+        words.removeIf{ it.english == curr_word.english }
+        curr_word.prev_seen = true
+        words.add(curr_word)
+    }
+
     fun updateWord(): Word {
-        val words = loadWords()
         return words[Random.nextInt(words.size)]
     }
 

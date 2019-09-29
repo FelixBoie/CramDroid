@@ -7,5 +7,5 @@ class Word(
     val english = _english
     val dutch = _dutch
     val activation = -.9999
-    val prev_seen = false
+    var prev_seen = false
 }
