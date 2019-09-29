@@ -8,7 +8,7 @@ import android.content.Context ;
 import android.content.Intent ;
 import android.graphics.Color;
 
-public class MyNotificationPublisher extends BroadcastReceiver {
+public class StudyNotificationPublisher extends BroadcastReceiver {
     public static String NOTIFICATION_ID = "notification-id" ;
     public static String NOTIFICATION = "notification" ;
     public void onReceive (Context context , Intent intent) {

@@ -13,9 +13,10 @@ import java.util.*
 import kotlin.concurrent.timerTask
 import android.app.*
 import android.os.SystemClock
-import classes.MyNotificationPublisher
+import classes.StudyNotificationPublisher
 import android.R.drawable.ic_dialog_alert
 import android.graphics.Color
+import classes.Word
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val words: List<Word>
         //createNotificationChannel()
     }
 
@@ -37,9 +40,9 @@ class MainActivity : AppCompatActivity() {
         scheduleNotification(getNotification("This would be a perfect time to study!"), 20000)
     }
     private fun scheduleNotification(notification: Notification, delay: Int) {
-        val notificationIntent = Intent(this, MyNotificationPublisher::class.java)
-        notificationIntent.putExtra(MyNotificationPublisher.NOTIFICATION_ID, 1)
-        notificationIntent.putExtra(MyNotificationPublisher.NOTIFICATION, notification)
+        val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
+        notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
+        notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
         val pendingIntent = PendingIntent.getBroadcast(
             this,
             0,
