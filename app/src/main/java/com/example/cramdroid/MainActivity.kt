@@ -2,20 +2,15 @@ package com.example.cramdroid
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color.argb
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import java.util.*
-import kotlin.concurrent.timerTask
 import android.app.*
 import android.os.SystemClock
-import classes.StudyNotificationPublisher
 import android.R.drawable.ic_dialog_alert
 import android.graphics.Color
+import classes.StudyNotificationPublisher
 import classes.Word
 
 
