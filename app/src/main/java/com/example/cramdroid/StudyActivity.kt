@@ -26,6 +26,7 @@ class StudyActivity : AppCompatActivity() {
         var item = model.curr_word
         val itemText = findViewById<TextView>(R.id.study_item)
         val answer = findViewById<EditText>(R.id.study_answer)
+        answer.inputType = 0x21
         val button = findViewById<Button>(R.id.study_submit_button)
         val feedback = findViewById<TextView>(R.id.study_feedback)
 
