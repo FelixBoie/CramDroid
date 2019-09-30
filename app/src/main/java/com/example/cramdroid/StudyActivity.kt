@@ -3,6 +3,7 @@ package com.example.cramdroid
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -26,7 +27,7 @@ class StudyActivity : AppCompatActivity() {
         var item = model.curr_word
         val itemText = findViewById<TextView>(R.id.study_item)
         val answer = findViewById<EditText>(R.id.study_answer)
-        answer.inputType = 0x21
+        answer.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
         val button = findViewById<Button>(R.id.study_submit_button)
         val feedback = findViewById<TextView>(R.id.study_feedback)
 
