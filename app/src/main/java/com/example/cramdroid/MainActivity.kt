@@ -12,6 +12,7 @@ import android.R.drawable.ic_dialog_alert
 import android.graphics.Color
 import classes.StudyNotificationPublisher
 import classes.Word
+import classes.spacingModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +34,11 @@ class MainActivity : AppCompatActivity() {
 
     fun settingsPress(view: View) {
         scheduleNotification(getNotification("This would be a perfect time to study!"), 20000)
+
+        //??? added by Felix
+        var spacingModel = spacingModel()
+        println(spacingModel.getNextMessageInXHours())
+        println(spacingModel.nextMessageTimePoint.toString())
     }
     private fun scheduleNotification(notification: Notification, delay: Int) {
         val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
