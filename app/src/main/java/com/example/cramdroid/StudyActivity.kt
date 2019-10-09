@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import classes.TrialInformation
 import classes.Word
 import viewmodels.WordViewModel
 
@@ -22,7 +23,7 @@ class StudyActivity : AppCompatActivity() {
 
 
         val model = ViewModelProviders.of(this).get(WordViewModel::class.java)
-
+        var currentTime = System.currentTimeMillis()
         var actionConfirm = false
         var item = model.curr_word
         val itemText = findViewById<TextView>(R.id.study_item)
@@ -30,12 +31,13 @@ class StudyActivity : AppCompatActivity() {
         answer.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
         val button = findViewById<Button>(R.id.study_submit_button)
         val feedback = findViewById<TextView>(R.id.study_feedback)
-
+        //var trialInformation = TrialInformation(item, 0, false)
         /*model.getWords().observe(this, Observer<List<Word>> {
             words: List<Word>? ->  print(words)
         })*/
 
-        model.curr_word = model.updateWord()
+        //set current word to random word from word set
+        model.curr_word = model.getRandomWord()
         item = model.curr_word
         itemText.text = item.english
         answer.setText("")
@@ -43,29 +45,39 @@ class StudyActivity : AppCompatActivity() {
         feedback.text = item.dutch
         feedback.setTextColor(Color.BLUE)
         itemText.setTextColor(Color.BLUE)
-        model.updateWordList()
+        //model.updateWordList()
         answer.isEnabled = false
         button.text = "Next"
 
         button.setOnClickListener {
             itemText.setTextColor(Color.BLACK)
-            if (actionConfirm) {
+            if (actionConfirm) {        //WHEN USER HAS TO TRANSLATE THE WORD
+                model.updateSeenWords(item, currentTime)
                 if (item.dutch == answer.text.toString().toLowerCase()){
                     feedback.text = "Correct!"
                     feedback.setTextColor(resources.getColor(R.color.colorCorrect))
                     answer.setTextColor(resources.getColor(R.color.colorCorrect))
+
+                    //add the information of current trial to the model
+                    model.trialInformation.addTrialInformation(item,System.currentTimeMillis()-currentTime, true)
                 } else {
                     feedback.text = "False!"
                     feedback.setTextColor(resources.getColor(R.color.colorFalse))
                     answer.setText(item.dutch)
                     answer.setTextColor(resources.getColor(R.color.colorFalse))
+                    //add the information of current trial to the model
+                    model.trialInformation.addTrialInformation(item,System.currentTimeMillis()-currentTime, false )
                 }
                 button.text = "Next"
                 feedback.visibility = View.VISIBLE
                 answer.isEnabled = false
                 actionConfirm = false
             } else {
-                model.curr_word = model.updateWord()
+                //Update the current time
+                currentTime = System.currentTimeMillis()
+                //ask the model for new word
+                model.askForNewWord()
+                //model.curr_word = model.updateWord()
                 item = model.curr_word
                 itemText.text = item.english
                 answer.setText("")
@@ -75,12 +87,13 @@ class StudyActivity : AppCompatActivity() {
                     answer.setTextColor(Color.BLACK)
                     button.text = "Submit"
                     feedback.visibility = View.INVISIBLE
-                } else {
+                } else {                //ITEM WAS NOT SEEN BEFORE
                     feedback.visibility = View.VISIBLE
                     feedback.text = item.dutch
                     feedback.setTextColor(Color.BLUE)
                     itemText.setTextColor(Color.BLUE)
-                    model.updateWordList()
+                    model.updateSeenWords(item, currentTime)
+                    //model.updateWordList()
                     answer.isEnabled = false
                     button.text = "Next"
                 }
