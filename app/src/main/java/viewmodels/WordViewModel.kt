@@ -1,7 +1,9 @@
 package viewmodels
 
+import android.app.Application
 import android.content.Context
 import android.os.Environment
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,10 +14,14 @@ import java.io.File
 import models.loadDutEngWords
 import java.io.FileInputStream
 import java.io.FileReader
+import kotlin.coroutines.coroutineContext
 import kotlin.random.Random
 
+    //Felix added changed ViewModel() to AndroidViewModel, which knows the context
+//?? felix added
+class WordViewModel(application: Application) : AndroidViewModel(application) {
 
-class WordViewModel: ViewModel() {
+
     /*private val words: MutableLiveData<MutableList<Word>> by lazy {
         MutableLiveData<MutableList<Word>>().also{
             loadWords()
@@ -39,6 +45,27 @@ class WordViewModel: ViewModel() {
     private fun onFalse(){
 
     }
+
+        //??? Felix Added
+    fun saveWords_felix (){
+
+        var context  = getApplication<Application>().applicationContext
+        var filename = "saveFileWords.csv"
+        var fileContext = "Hello world123"
+        context.openFileOutput(filename,Context.MODE_PRIVATE).use{it.write(fileContext.toByteArray())}
+    }
+        //??? Felix Added
+    fun loadWords_felix(){
+        var context  = getApplication<Application>().applicationContext
+        var filename = "saveFileWords.csv"
+        var fileContext = "Hello world123"
+        val file = File(context.filesDir,filename)
+        val contents = file.readText() // read file
+        println(contents)
+    }
+
+
+
 
     fun updateWordList() {
         words.removeIf{ it.english == curr_word.english }

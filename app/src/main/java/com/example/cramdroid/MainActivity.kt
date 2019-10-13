@@ -13,11 +13,13 @@ import android.graphics.Color
 import classes.StudyNotificationPublisher
 import classes.Word
 import classes.spacingModel
+import viewmodels.WordViewModel
 
 
 class MainActivity : AppCompatActivity() {
     public val NOTIFICATION_CHANNEL_ID = "10001"
     private val default_notification_channel_id = "Penis"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,17 @@ class MainActivity : AppCompatActivity() {
         var spacingModel = spacingModel()
         println(spacingModel.getNextMessageInXHours())
         println(spacingModel.nextMessageTimePoint.toString())
+
+
+        var context  = getApplicationContext()
+        var filename = "myfile2.csv"
+        var fileContext = "Hello world123"
+        context.openFileOutput(filename,Context.MODE_PRIVATE).use{it.write(fileContext.toByteArray())}
+
+
+
+
+
     }
     private fun scheduleNotification(notification: Notification, delay: Int) {
         val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
