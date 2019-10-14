@@ -5,6 +5,7 @@ import android.os.Environment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import classes.Encounter
 import classes.TrialInformation
 import classes.Word
 import com.example.cramdroid.R
@@ -23,11 +24,12 @@ class WordViewModel: ViewModel() {
             loadWords()
         }
     }*/
-    private val spacingModel = SpacingModel()
-   private var curr_word = getRandomWord()
+    val words = loadWords()
+
+    val spacingModel = SpacingModel()
+     var curr_word = getRandomWord()
     private val seenWords = MutableList<Word>(1){curr_word}
-    var trialInformation = TrialInformation(curr_word, 0, false)
-   private val words = loadWords()
+
 
     /*fun getWords(): LiveData<MutableList<Word>> {
         return words
@@ -65,12 +67,12 @@ class WordViewModel: ViewModel() {
         if (!curr_word.prev_seen){
             currentWord.prev_seen = true
             seenWords.add(curr_word)
-            words.removeIf{it.english == curr_word.english}
+            //words.removeIf{it.english == curr_word.english}
         }
         //add encounter of the word
         for (i in seenWords) {
             if (i.english == currentWord.english) {
-                i.encounters.add(currentTime)
+                i.encounters.add(Encounter(currentWord.activation, spacingModel.trialInformation.reactionTime, currentTime.toFloat()))
             }
         }
     }
@@ -80,9 +82,11 @@ class WordViewModel: ViewModel() {
 
         if (nextword.english == "new word"){ // IF ALL WORDS ARE ABOVE ACTIVATION THRESHOLD
             curr_word = getRandomWord()
+
         }else{
             curr_word = nextword
         }
+
 
     }
 

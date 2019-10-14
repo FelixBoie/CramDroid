@@ -6,12 +6,14 @@ class Word(
 ) {
     val english = _english
     val dutch = _dutch
-    var activation = -.9999
+    var activation: Float = Float.NEGATIVE_INFINITY
     var prev_seen = false
-    var encounters = mutableListOf<Long>()
-    var previous_activation = -0.99999
-
-    fun add_encounter(encounter: Long){
+    var encounters = mutableListOf<Encounter>()
+    var previous_activation = Float.NEGATIVE_INFINITY
+    var alpha = 0.3F
+    var previous_alpha : Float = 0.3F
+    var decay = 0.3F
+    fun add_encounter(encounter: Encounter){
         encounters.add(encounter)
     }
 }

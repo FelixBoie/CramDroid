@@ -3,6 +3,7 @@ package com.example.cramdroid
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.InputType
 import android.view.View
 import android.widget.Button
@@ -23,7 +24,7 @@ class StudyActivity : AppCompatActivity() {
 
 
         val model = ViewModelProviders.of(this).get(WordViewModel::class.java)
-        var currentTime = System.currentTimeMillis()
+        var currentTime =  SystemClock.currentThreadTimeMillis()// TODO: fix spacing
         var actionConfirm = false
         var item = model.curr_word
         val itemText = findViewById<TextView>(R.id.study_item)
@@ -59,20 +60,25 @@ class StudyActivity : AppCompatActivity() {
                     answer.setTextColor(resources.getColor(R.color.colorCorrect))
 
                     //add the information of current trial to the model
-                    model.trialInformation.addTrialInformation(item,System.currentTimeMillis()-currentTime, true)
+                    model.spacingModel.trialInformation.addTrialInformation(item,
+                        (System.currentTimeMillis()-currentTime).toFloat(), true)
                 } else {
                     feedback.text = "False!"
                     feedback.setTextColor(resources.getColor(R.color.colorFalse))
                     answer.setText(item.dutch)
                     answer.setTextColor(resources.getColor(R.color.colorFalse))
                     //add the information of current trial to the model
-                    model.trialInformation.addTrialInformation(item,System.currentTimeMillis()-currentTime, false )
+                    model.spacingModel.trialInformation.addTrialInformation(item,(System.currentTimeMillis()-currentTime).toFloat(), false )
                 }
                 button.text = "Next"
                 feedback.visibility = View.VISIBLE
                 answer.isEnabled = false
                 actionConfirm = false
             } else {
+                println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
+                for (e in model.curr_word.encounters){
+                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
+                }
                 //Update the current time
                 currentTime = System.currentTimeMillis()
                 //ask the model for new word
@@ -92,15 +98,21 @@ class StudyActivity : AppCompatActivity() {
                     feedback.text = item.dutch
                     feedback.setTextColor(Color.BLUE)
                     itemText.setTextColor(Color.BLUE)
+                    model.spacingModel.trialInformation.addTrialInformation(item,(System.currentTimeMillis()-currentTime).toFloat(), false )
                     model.updateSeenWords(item, currentTime)
                     //model.updateWordList()
                     answer.isEnabled = false
                     button.text = "Next"
                 }
-
+                println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
+                for (e in model.curr_word.encounters){
+                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
+                }
             }
 
 
         }
     }
 }
+
+
