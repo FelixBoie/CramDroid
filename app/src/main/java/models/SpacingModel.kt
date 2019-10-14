@@ -1,4 +1,5 @@
 package models
+import android.os.SystemClock
 import classes.Encounter
 import classes.TrialInformation
 import classes.Word
@@ -28,14 +29,14 @@ class SpacingModel() {
 //    }
 
     fun selectAction(seen_words: MutableList<Word>): Word{
-        for(word in seen_words){
-            println("Word: " + word.english)
-            println("Activation: " + word.activation)
-            println("Decay: " + word.decay)
-            for (e in word.encounters){
-                println("Encounter: " + e.time_of_encounter  + "   " + e.reaction_time + "   " + e.activation)
-            }
-        }
+//        for(word in seen_words){
+//            println("3 Word: " + word.english)
+//            println("Activation: " + word.activation)
+//            println("Decay: " + word.decay)
+//            for (e in word.encounters){
+//                println("Encounter: " + e.time_of_encounter  + "   " + e.reaction_time + "   " + e.activation)
+//            }
+//        }
         val lowestActivatedWord = calculateLowestActivations(seen_words)
         if(lowestActivatedWord.activation < FORGET_THRESHOLD ){
             return lowestActivatedWord
@@ -70,9 +71,9 @@ class SpacingModel() {
         word.decay = decay
 
         for(i in word.encounters){
-            val elapsedTimeSinceEncounter= (System.currentTimeMillis()-i.time_of_encounter)
-            println("Elapsed time: " + word.english + "  " + elapsedTimeSinceEncounter)
-            activation += elapsedTimeSinceEncounter.pow(decay)
+            val elapsedTimeSinceEncounter= (SystemClock.elapsedRealtime()-i.time_of_encounter)
+            //println("Elapsed time: " + word.english + "  " + elapsedTimeSinceEncounter)
+            activation += elapsedTimeSinceEncounter.pow(-decay)
             i.decay = decay
         }
 
@@ -202,18 +203,19 @@ class SpacingModel() {
 //        Calculate the summed absolute difference between observed response times and those predicted based on a decay adjustment.
 //        """
         var activations = mutableListOf<Float>()
-        if(test_set.size > 0){
-        for (e in 1..test_set.size)
-        {
-            activations[e] = (calculate_activation_from_encounters(decay_adjusted_encounters, test_set[e].time_of_encounter))
+        if(test_set.lastIndex > 0){
+            for (e in 1..test_set.lastIndex)
+            {
+                activations.add(calculate_activation_from_encounters(decay_adjusted_encounters, test_set[e].time_of_encounter))
 
-        }}else{
+            }
+        }else{
             return 0F
         }
 
         var rt = 0F
         var rt_errors = 0F
-        for (a in 1..activations.size){
+        for (a in 1..activations.lastIndex){
             rt = estimate_reaction_time_from_activation(activations[a],readingTime )
             rt_errors += abs(test_set[a].reaction_time - rt)
         }
@@ -238,10 +240,13 @@ class SpacingModel() {
         var activation = 0.0
 
         for(e in included_encounters){
-           activation += (System.currentTimeMillis()-e.time_of_encounter).pow(e.decay)
+           activation += (SystemClock.elapsedRealtime() - e.time_of_encounter/1000).pow(-e.decay)
         }
+        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + activation )
 
-        return (log(activation)).toFloat()
+        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + log(activation) )
+
+        return log(activation).toFloat()
     }
 
 

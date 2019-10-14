@@ -24,7 +24,8 @@ class StudyActivity : AppCompatActivity() {
 
 
         val model = ViewModelProviders.of(this).get(WordViewModel::class.java)
-        var currentTime =  SystemClock.currentThreadTimeMillis()// TODO: fix spacing
+        var currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
+        println("!!!!!!!!!!!!!!!!!!!!!!!!!1" + currentTime)
         var actionConfirm = false
         var item = model.curr_word
         val itemText = findViewById<TextView>(R.id.study_item)
@@ -52,6 +53,8 @@ class StudyActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             itemText.setTextColor(Color.BLACK)
+            //currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
+            //println("!!!!!!!!!!!!!!!!!!!!!!!!!    " + currentTime)
             if (actionConfirm) {        //WHEN USER HAS TO TRANSLATE THE WORD
                 model.updateSeenWords(item, currentTime)
                 if (item.dutch == answer.text.toString().toLowerCase()){
@@ -61,28 +64,29 @@ class StudyActivity : AppCompatActivity() {
 
                     //add the information of current trial to the model
                     model.spacingModel.trialInformation.addTrialInformation(item,
-                        (System.currentTimeMillis()-currentTime).toFloat(), true)
+                        (SystemClock.elapsedRealtime()-currentTime).toFloat(), true)
+
                 } else {
                     feedback.text = "False!"
                     feedback.setTextColor(resources.getColor(R.color.colorFalse))
                     answer.setText(item.dutch)
                     answer.setTextColor(resources.getColor(R.color.colorFalse))
                     //add the information of current trial to the model
-                    model.spacingModel.trialInformation.addTrialInformation(item,(System.currentTimeMillis()-currentTime).toFloat(), false )
+                    model.spacingModel.trialInformation.addTrialInformation(item,(SystemClock.elapsedRealtime()-currentTime).toFloat(), false )
                 }
                 button.text = "Next"
                 feedback.visibility = View.VISIBLE
                 answer.isEnabled = false
                 actionConfirm = false
+                //ask the model for new word
+                model.askForNewWord()
             } else {
                 println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
                 for (e in model.curr_word.encounters){
                     println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
                 }
                 //Update the current time
-                currentTime = System.currentTimeMillis()
-                //ask the model for new word
-                model.askForNewWord()
+                currentTime = SystemClock.elapsedRealtime()
                 //model.curr_word = model.updateWord()
                 item = model.curr_word
                 itemText.text = item.english
@@ -98,16 +102,17 @@ class StudyActivity : AppCompatActivity() {
                     feedback.text = item.dutch
                     feedback.setTextColor(Color.BLUE)
                     itemText.setTextColor(Color.BLUE)
-                    model.spacingModel.trialInformation.addTrialInformation(item,(System.currentTimeMillis()-currentTime).toFloat(), false )
+                    model.spacingModel.trialInformation.addTrialInformation(item,(SystemClock.elapsedRealtime()-currentTime).toFloat(), false )
                     model.updateSeenWords(item, currentTime)
                     //model.updateWordList()
                     answer.isEnabled = false
                     button.text = "Next"
                 }
-                println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
+                println("2. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
                 for (e in model.curr_word.encounters){
                     println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
                 }
+                currentTime = SystemClock.elapsedRealtime()
             }
 
 

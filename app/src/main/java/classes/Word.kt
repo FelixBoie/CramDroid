@@ -13,7 +13,4 @@ class Word(
     var alpha = 0.3F
     var previous_alpha : Float = 0.3F
     var decay = 0.3F
-    fun add_encounter(encounter: Encounter){
-        encounters.add(encounter)
-    }
 }

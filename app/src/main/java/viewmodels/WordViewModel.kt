@@ -2,6 +2,7 @@ package viewmodels
 
 import android.content.Context
 import android.os.Environment
+import android.os.SystemClock
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,7 +26,6 @@ class WordViewModel: ViewModel() {
         }
     }*/
     val words = loadWords()
-
     val spacingModel = SpacingModel()
      var curr_word = getRandomWord()
     private val seenWords = MutableList<Word>(1){curr_word}
@@ -79,6 +79,16 @@ class WordViewModel: ViewModel() {
     fun askForNewWord(){
         //first
         var nextword : Word = spacingModel.selectAction(seenWords)
+
+        for(word in seenWords){
+            println("3 Word: " + word.english)
+            println("Activation: " + word.activation)
+            println("Decay: " + word.decay)
+            for (e in word.encounters){
+                println("Encounter: " + e.time_of_encounter  + " reaction time:  " + e.reaction_time + " activation " + e.activation)
+            }
+        }
+
 
         if (nextword.english == "new word"){ // IF ALL WORDS ARE ABOVE ACTIVATION THRESHOLD
             curr_word = getRandomWord()
