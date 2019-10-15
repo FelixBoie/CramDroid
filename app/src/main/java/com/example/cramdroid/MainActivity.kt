@@ -12,6 +12,7 @@ import android.R.drawable.ic_dialog_alert
 import android.graphics.Color
 import classes.StudyNotificationPublisher
 import classes.Word
+import models.SchedullingModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,9 +33,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun settingsPress(view: View) {
-        scheduleNotification(getNotification("This would be a perfect time to study!"), 20000)
+        scheduleNotification(getNotification("This would be a perfect time to study!"))
     }
-    private fun scheduleNotification(notification: Notification, delay: Int) {
+    private fun scheduleNotification(notification: Notification) {
         val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
         notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
         notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
@@ -44,7 +45,14 @@ class MainActivity : AppCompatActivity() {
             notificationIntent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val futureInMillis = SystemClock.elapsedRealtime() + delay
+        // calculate Delay
+        var SchedullingModel = SchedullingModel()
+        SchedullingModel.updateLastTest()
+        val delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
+        //val delay = spacingModel.nextMessageInXHours*60*60*1000 // delay in milliseconds
+
+
+        val futureInMillis = SystemClock.elapsedRealtime() + SchedullingModel.nextMessageInXHours*60*60*1000 // delay in milliseconds
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         println("Scheduling...")
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)

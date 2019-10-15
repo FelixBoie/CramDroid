@@ -1,7 +1,7 @@
 package classes
 
 class TrialInformation(_word: Word, _reactionTime: Float, _correct: Boolean ) {
-     var curWord: Word = _word
+    var curWord: Word = _word
     var reactionTime: Float = _reactionTime
     var correctNess: Boolean = _correct
 

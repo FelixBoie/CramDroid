@@ -1,25 +1,15 @@
 package viewmodels
 
-import android.content.Context
-import android.os.Environment
-import android.os.SystemClock
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import classes.Encounter
-import classes.TrialInformation
 import classes.Word
-import com.example.cramdroid.R
+import models.CSVImport2
 import models.SpacingModel
-import models.csvListSplitter
-import java.io.File
-import models.loadDutEngWords
-import java.io.FileInputStream
-import java.io.FileReader
 import kotlin.random.Random
 
 
-class WordViewModel: ViewModel() {
+class WordViewModel(application: Application) : AndroidViewModel(application) {
     /*private val words: MutableLiveData<MutableList<Word>> by lazy {
         MutableLiveData<MutableList<Word>>().also{
             loadWords()
@@ -27,16 +17,25 @@ class WordViewModel: ViewModel() {
     }*/
     val words = loadWords()
     val spacingModel = SpacingModel()
-     var curr_word = getRandomWord()
-    private val seenWords = MutableList<Word>(1){curr_word}
+    var curr_word = getRandomWord()
+    private val seenWords = MutableList<Word>(1){curr_word} // ??? maybe we can change this one to ArrayList, I do not know how to work with mutable list in java
 
 
     /*fun getWords(): LiveData<MutableList<Word>> {
         return words
     }*/
 
-    private fun loadWords(): MutableList<Word> {
-        return loadDutEngWords()
+    private fun loadWords(): ArrayList<Word> {
+        var test = CSVImport2()
+        // check if a file in was already created, if yes load that, otherwise use the csv from res
+        return test.general_readCsv(getApplication<Application>().applicationContext)
+    }
+
+    fun writeToCsvFile(){
+        System.out.println("Hurra, wrote to csv file!!!!!!!!!!!!!!!!!!!!!!!")
+        var test = CSVImport2()
+        test.writeCSV(getApplication<Application>().applicationContext,words)
+
     }
 
     private fun onCorrect(){

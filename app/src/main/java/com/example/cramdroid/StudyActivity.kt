@@ -53,6 +53,11 @@ class StudyActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             itemText.setTextColor(Color.BLACK)
+
+            // ??? write to document for testing
+            model.writeToCsvFile()
+
+
             //currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
             //println("!!!!!!!!!!!!!!!!!!!!!!!!!    " + currentTime)
             if (actionConfirm) {        //WHEN USER HAS TO TRANSLATE THE WORD
