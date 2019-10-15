@@ -81,10 +81,10 @@ class StudyActivity : AppCompatActivity() {
                 //ask the model for new word
                 model.askForNewWord()
             } else {
-                println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
-                for (e in model.curr_word.encounters){
-                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
-                }
+//                println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
+//                for (e in model.curr_word.encounters){
+//                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
+//                }
                 //Update the current time
                 currentTime = SystemClock.elapsedRealtime()
                 //model.curr_word = model.updateWord()
@@ -108,10 +108,10 @@ class StudyActivity : AppCompatActivity() {
                     answer.isEnabled = false
                     button.text = "Next"
                 }
-                println("2. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
-                for (e in model.curr_word.encounters){
-                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
-                }
+//                println("2. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
+//                for (e in model.curr_word.encounters){
+//                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
+//                }
                 currentTime = SystemClock.elapsedRealtime()
             }
 

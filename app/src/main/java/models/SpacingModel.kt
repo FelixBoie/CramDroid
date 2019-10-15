@@ -6,7 +6,7 @@ import classes.Word
 import java.lang.Math.abs
 import java.lang.Math.log
 import java.util.EnumSet.range
-
+import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.exp
 
@@ -38,6 +38,10 @@ class SpacingModel() {
 //            }
 //        }
         val lowestActivatedWord = calculateLowestActivations(seen_words)
+        for (e in seen_words){
+            println(e.english + " activation:  " + e.activation)
+        }
+
         if(lowestActivatedWord.activation < FORGET_THRESHOLD ){
             return lowestActivatedWord
         }else{
@@ -66,18 +70,10 @@ class SpacingModel() {
 
     //calculate activation of one word
     private fun calcActivationOfOneWord(word: Word): Float{
-        var activation = 0F
         val decay = estimateDecay(word)
         word.decay = decay
-
-        for(i in word.encounters){
-            val elapsedTimeSinceEncounter= (SystemClock.elapsedRealtime()-i.time_of_encounter)
-            //println("Elapsed time: " + word.english + "  " + elapsedTimeSinceEncounter)
-            activation += elapsedTimeSinceEncounter.pow(-decay)
-            i.decay = decay
-        }
-
-        return activation.toFloat()
+        word.activation = calculate_activation_from_encounters(word.encounters, SystemClock.elapsedRealtime().toFloat())
+        return word.activation
 
     }
 
@@ -240,13 +236,13 @@ class SpacingModel() {
         var activation = 0.0
 
         for(e in included_encounters){
-           activation += (SystemClock.elapsedRealtime() - e.time_of_encounter/1000).pow(-e.decay)
+           activation += ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay)
         }
-        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + activation )
+//        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + activation )
+//
+//        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + log(activation) )
 
-        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + log(activation) )
-
-        return log(activation).toFloat()
+        return ln(activation).toFloat()
     }
 
 

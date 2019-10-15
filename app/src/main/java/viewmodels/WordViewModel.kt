@@ -80,14 +80,14 @@ class WordViewModel: ViewModel() {
         //first
         var nextword : Word = spacingModel.selectAction(seenWords)
 
-        for(word in seenWords){
-            println("3 Word: " + word.english)
-            println("Activation: " + word.activation)
-            println("Decay: " + word.decay)
-            for (e in word.encounters){
-                println("Encounter: " + e.time_of_encounter  + " reaction time:  " + e.reaction_time + " activation " + e.activation)
-            }
-        }
+//        for(word in seenWords){
+//            println("3 Word: " + word.english)
+//            println("Activation: " + word.activation)
+//            println("Decay: " + word.decay)
+//            for (e in word.encounters){
+//                println("Encounter: " + e.time_of_encounter  + " reaction time:  " + e.reaction_time + " activation " + e.decay)
+//            }
+//        }
 
 
         if (nextword.english == "new word"){ // IF ALL WORDS ARE ABOVE ACTIVATION THRESHOLD
