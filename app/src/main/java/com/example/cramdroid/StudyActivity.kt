@@ -4,14 +4,12 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import classes.Word
 import viewmodels.WordViewModel
 
 class StudyActivity : AppCompatActivity() {
@@ -21,44 +19,65 @@ class StudyActivity : AppCompatActivity() {
         setContentView(R.layout.activity_study)
 
 
+        // set up of viewModel
         val model = ViewModelProviders.of(this).get(WordViewModel::class.java)
+        model.curr_word = model.updateWord()
 
-        var actionConfirm = false
-        var item = model.curr_word
+        // set up text views
         val itemText = findViewById<TextView>(R.id.study_item)
         val answer = findViewById<EditText>(R.id.study_answer)
         answer.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
-        val button = findViewById<Button>(R.id.study_submit_button)
         val feedback = findViewById<TextView>(R.id.study_feedback)
 
-        /*model.getWords().observe(this, Observer<List<Word>> {
-            words: List<Word>? ->  print(words)
-        })*/
-
-        model.curr_word = model.updateWord()
-        item = model.curr_word
-        itemText.text = item.english
-        answer.setText("")
-        feedback.visibility = View.VISIBLE
-        feedback.text = item.dutch
-        feedback.setTextColor(Color.BLUE)
-        itemText.setTextColor(Color.BLUE)
-        model.updateWordList()
+        // set up button
+        val button = findViewById<Button>(R.id.study_submit_button)
         answer.isEnabled = false
         button.text = "Next"
 
+        // set up variables
+        var actionConfirm = false
+        var item = model.curr_word
+
+
+
+        // intializing
+        itemText.text = item.swahili
+        answer.setText("")
+        feedback.visibility = View.VISIBLE
+        feedback.text = item.english
+        feedback.setTextColor(Color.BLUE)
+        itemText.setTextColor(Color.BLUE)
+        model.updateWordList()
+
+
+
+        // clicked button for next/Submit
         button.setOnClickListener {
             itemText.setTextColor(Color.BLACK)
+
+
+            //??? test if writing to csv works, should be applied, when you are going back to the prior page
+            model.writeWordsToCsv()
+
+
+
+
+
             if (actionConfirm) {
-                if (item.dutch == answer.text.toString().toLowerCase()){
+                if (item.swahili == answer.text.toString().toLowerCase()){
                     feedback.text = "Correct!"
-                    feedback.setTextColor(resources.getColor(R.color.colorCorrect))
-                    answer.setTextColor(resources.getColor(R.color.colorCorrect))
+                    // This lead to errors for me, so I just directly set the colors, Felix ???
+                    //feedback.setTextColor(resources.getColor(R.color.colorCorrect))
+                    //answer.setTextColor(resources.getColor(R.color.colorCorrect))
+                    feedback.setTextColor(Color.GREEN)
+                    answer.setTextColor(Color.GREEN)
                 } else {
                     feedback.text = "False!"
-                    feedback.setTextColor(resources.getColor(R.color.colorFalse))
-                    answer.setText(item.dutch)
-                    answer.setTextColor(resources.getColor(R.color.colorFalse))
+                    //feedback.setTextColor(resources.getColor(R.color.colorFalse))
+                    feedback.setTextColor(Color.RED)
+                    answer.setText(item.swahili)
+                    //answer.setTextColor(resources.getColor(R.color.colorFalse))
+                    answer.setTextColor(Color.RED)
                 }
                 button.text = "Next"
                 feedback.visibility = View.VISIBLE
@@ -77,17 +96,14 @@ class StudyActivity : AppCompatActivity() {
                     feedback.visibility = View.INVISIBLE
                 } else {
                     feedback.visibility = View.VISIBLE
-                    feedback.text = item.dutch
+                    feedback.text = item.swahili
                     feedback.setTextColor(Color.BLUE)
                     itemText.setTextColor(Color.BLUE)
                     model.updateWordList()
                     answer.isEnabled = false
                     button.text = "Next"
                 }
-
             }
-
-
         }
     }
 }

@@ -1,15 +1,13 @@
-package classes;
+package models;
 
-
-import android.util.Log;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.time.format.TextStyle;
-import java.util.Locale;
+
+import classes.timePoint;
 
 
 public class spacingModel {
@@ -35,6 +33,9 @@ public class spacingModel {
         }
     }
 
+    public int getNextMessageInMS_test(){
+        return 20000;
+    }
     public int getNextMessageInXHours(){
         updateLastTest();
         return adjustSentMessageInXHours(getNextMessageInXHours_bySpacingModel());

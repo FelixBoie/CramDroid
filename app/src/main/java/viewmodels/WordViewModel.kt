@@ -1,35 +1,32 @@
 package viewmodels
 
-import android.content.Context
-import android.os.Environment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import classes.Word
-import com.example.cramdroid.R
-import models.csvListSplitter
-import java.io.File
-import models.loadDutEngWords
-import java.io.FileInputStream
-import java.io.FileReader
+import models.CSVImport2
 import kotlin.random.Random
 
 
-class WordViewModel: ViewModel() {
-    /*private val words: MutableLiveData<MutableList<Word>> by lazy {
-        MutableLiveData<MutableList<Word>>().also{
-            loadWords()
-        }
-    }*/
+class WordViewModel(application: Application) : AndroidViewModel(application) {
 
-    val words = loadWords()
+    var words = loadWords()
+    var curr_word = updateWord()
 
-    /*fun getWords(): LiveData<MutableList<Word>> {
-        return words
-    }*/
 
-    private fun loadWords(): MutableList<Word> {
-        return loadDutEngWords()
+
+    private fun loadWords(): ArrayList<Word> {
+        var test = CSVImport2()
+        // check if a file in was already created, if yes load that, otherwise use the csv from res
+
+        return test.general_readCsv(getApplication<Application>().applicationContext)
+    }
+
+
+    fun writeWordsToCsv(){
+        var test = CSVImport2()
+        test.writeCSV(getApplication<Application>().applicationContext,words)
     }
 
     private fun onCorrect(){
@@ -39,17 +36,14 @@ class WordViewModel: ViewModel() {
     private fun onFalse(){
 
     }
-
     fun updateWordList() {
-        words.removeIf{ it.english == curr_word.english }
+        words.removeIf { it.english == curr_word.english }
         curr_word.prev_seen = true
         words.add(curr_word)
     }
-
     fun updateWord(): Word {
         return words[Random.nextInt(words.size)]
     }
 
-    var curr_word = updateWord()
 
 }

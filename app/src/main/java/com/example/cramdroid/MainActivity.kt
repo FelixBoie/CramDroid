@@ -12,35 +12,32 @@ import android.R.drawable.ic_dialog_alert
 import android.graphics.Color
 import classes.StudyNotificationPublisher
 import classes.Word
-import classes.spacingModel
+import models.spacingModel
 
 
 class MainActivity : AppCompatActivity() {
-    public val NOTIFICATION_CHANNEL_ID = "10001"
+    val NOTIFICATION_CHANNEL_ID = "10001"
     private val default_notification_channel_id = "Penis"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val words: List<Word>
-        //createNotificationChannel()
     }
 
+
+    // pressed start button
     fun openTaskChoice(view: View) {
         val intent = Intent(this, TaskChoiceActivity::class.java)
         startActivity(intent)
     }
 
+    // pressed Settings button
     fun settingsPress(view: View) {
-        scheduleNotification(getNotification("This would be a perfect time to study!"), 20000)
-
-        //??? added by Felix
-        var spacingModel = spacingModel()
-        println(spacingModel.getNextMessageInXHours())
-        println(spacingModel.nextMessageTimePoint.toString())
+        scheduleNotification(getNotification("This would be a perfect time to study!"))
     }
-    private fun scheduleNotification(notification: Notification, delay: Int) {
+
+    //sets the notification
+    private fun scheduleNotification(notification: Notification) {
         val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
         notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
         notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
@@ -50,12 +47,22 @@ class MainActivity : AppCompatActivity() {
             notificationIntent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
+
+        //calculate the delay with the spacing model
+        var spacingModel = spacingModel()
+        spacingModel.updateLastTest() // update to the current time
+        // println(spacingModel.getNextMessageInXHours())
+        // println(spacingModel.nextMessageTimePoint.toString())
+        val delay = spacingModel.nextMessageInMS_test // only for testing
+        //val delay = spacingModel.nextMessageInXHours*60*60*1000 // delay in milliseconds
+
         val futureInMillis = SystemClock.elapsedRealtime() + delay
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         println("Scheduling...")
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
     }
 
+    //creates notification
     private fun getNotification(content: String): Notification {
 
         val intent = Intent(this, MainActivity::class.java)
