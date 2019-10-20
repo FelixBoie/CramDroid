@@ -45,5 +45,4 @@ class Word(
         }
         return outputString
     }
-
 }

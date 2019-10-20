@@ -13,6 +13,7 @@ import android.graphics.Color
 import classes.StudyNotificationPublisher
 import classes.Word
 import models.SchedullingModel
+import models.WorkWithCSV
 
 
 class MainActivity : AppCompatActivity() {
@@ -75,6 +76,29 @@ class MainActivity : AppCompatActivity() {
         builder.setChannelId(NOTIFICATION_CHANNEL_ID)
         println("built")
         return builder.build()
+    }
+
+    // Save the important information for later analysis
+    fun sendOutputViaEmail(view: View) {
+        // taken from https://www.youtube.com/watch?v=tZ2YEw6SoBU
+        val recipientList = "fbfelix@web.de" //
+        val recipients = recipientList.split(",".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray() // email addresses to sent to
+
+        val subject = "UserModel_data"
+
+        var test = WorkWithCSV()
+
+        val message = test.general_readCsv2_asString(this.applicationContext) // reads in the output from the trial
+
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_EMAIL, recipients)
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject)
+        intent.putExtra(Intent.EXTRA_TEXT, message)
+
+        intent.type = "message/rfc822" // only use Email apps
+
+        startActivity(Intent.createChooser(intent, "Choose an email client"))
     }
 
 }

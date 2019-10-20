@@ -1,11 +1,13 @@
 package viewmodels
 
+import android.app.Activity
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import classes.Encounter
 import classes.Word
-import models.CSVImport2
 import models.SpacingModel
+import models.WorkWithCSV
 import kotlin.random.Random
 
 
@@ -26,16 +28,15 @@ class WordViewModel(application: Application) : AndroidViewModel(application) {
     }*/
 
     private fun loadWords(): ArrayList<Word> {
-        var test = CSVImport2()
+        var test = WorkWithCSV()
         // check if a file in was already created, if yes load that, otherwise use the csv from res
         return test.general_readCsv(getApplication<Application>().applicationContext)
     }
 
     fun writeToCsvFile(){
         System.out.println("Hurra, wrote to csv file!!!!!!!!!!!!!!!!!!!!!!!")
-        var test = CSVImport2()
+        var test = WorkWithCSV()
         test.writeCSV(getApplication<Application>().applicationContext,words)
-
     }
 
     private fun onCorrect(){

@@ -54,7 +54,7 @@ class StudyActivity : AppCompatActivity() {
         button.setOnClickListener {
             itemText.setTextColor(Color.BLACK)
 
-            // ??? write to document for testing
+            // every time the button is pressed, add the information to the csv file
             model.writeToCsvFile()
 
 

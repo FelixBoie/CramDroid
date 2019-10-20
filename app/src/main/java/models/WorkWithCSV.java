@@ -1,31 +1,26 @@
 package models;
 
+import android.app.Activity;
 import android.content.Context;
-import android.os.Environment;
+import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.cramdroid.R;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
 import java.nio.charset.Charset;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 
 import classes.Encounter;
 import classes.Word;
 
-public class CSVImport2 {
+public class WorkWithCSV {
     // things to save
     /*
     val english = _english
@@ -41,6 +36,7 @@ public class CSVImport2 {
 
 
     String FILENAME = "saveWords.csv";
+    // words are saved in a long string, one word per line, the pos_ variables define the position they are on
     int pos_dutch = 0;
     int pos_english = 1;
 
@@ -61,8 +57,19 @@ public class CSVImport2 {
         }
     }
 
+    public String general_readCsv2_asString(Context context){
+        String wordsList_String = "";
+        ArrayList<Word> words = general_readCsv(context);
 
-    public ArrayList<Word> initializeWords_readInCsv(Context context){
+        // loop over all words and add them together
+        for(int i=0; i<words.size(); i++) {
+            wordsList_String += words.get(i).getAsString() + ";"; // havent found a good way to show end, \n does not work
+        }
+        return wordsList_String;
+    }
+
+    // reads in the words from the folder res.raw
+    private ArrayList<Word> initializeWords_readInCsv(Context context){
         InputStream is = context.getResources().openRawResource(R.raw.swahili);
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(is, Charset.forName("UTF-8"))
@@ -87,7 +94,8 @@ public class CSVImport2 {
         return words;
     }
 
-    public ArrayList<Word> readCSV_priorWritten(Context context){
+    // reads in from the internalized memory
+    private ArrayList<Word> readCSV_priorWritten(Context context){
         FileInputStream fis = null;
         ArrayList<Word> words = new ArrayList<Word>();
 
@@ -95,20 +103,14 @@ public class CSVImport2 {
             fis = context.openFileInput(FILENAME);
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader br = new BufferedReader(isr);
-            StringBuilder sb = new StringBuilder();
             String oneLine;
 
             while((oneLine =br.readLine()) != null){
                 words.add(setStringLineToWord(oneLine));
             }
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return words;
     }
 
@@ -119,8 +121,6 @@ public class CSVImport2 {
 
         //data saved
         String data = setWordsToString(words);
-
-
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(FILENAME, Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
@@ -170,5 +170,4 @@ public class CSVImport2 {
 
         return word;
     }
-
 }

@@ -8,4 +8,5 @@
     <string name="study_input">Your Answer</string>
     <string name="study_submit">Submit</string>
     <string name="others_lab">Other Tasks</string>
+    <string name="sent_Email">Sent Email</string>
 </resources>
