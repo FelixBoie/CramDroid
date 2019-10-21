@@ -10,8 +10,8 @@ import classes.timePoint;
 
 public class SchedullingModel {
 
-    private timePoint lastStudied  = new timePoint(2000,1,1,1,0,0,0);
-    private timePoint finalTest  = new timePoint(2019,10,11,12, 0,0,0);
+    private timePoint lastStudied  = new timePoint(2000,1,1,1,0,0,0); // just initialize
+    private timePoint finalTest  = new timePoint(2019,10,11,12, 0,0,0); // day of the final test
 
     private int blockedTimeStart  = 20; // the hour of the day
     private int blockedTimeStop = 8;    // the hour of the day

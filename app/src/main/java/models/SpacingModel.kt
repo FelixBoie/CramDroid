@@ -39,7 +39,8 @@ class SpacingModel() {
 //        }
         val lowestActivatedWord = calculateLowestActivations(seen_words)
         for (e in seen_words){
-            println(e.english + " activation:  " + e.activation)
+            println(e.english + " activation:  " + e.activation )
+            println(e.english + " alpha:  " + e.alpha )
         }
 
         if(lowestActivatedWord.activation < FORGET_THRESHOLD ){
@@ -55,6 +56,7 @@ class SpacingModel() {
         lowestActivationWord.activation = Float.POSITIVE_INFINITY
         var lowest_activation  = Float.POSITIVE_INFINITY
         for (i in seen_words){
+            i.alpha = estimateAlpha(i)
             i.activation = calcActivationOfOneWord(i)
             if (i.activation < lowest_activation) {
                 println("activation: " + i.english + "  " + i.activation)
@@ -79,7 +81,8 @@ class SpacingModel() {
 
     //estimate the decay of one word pair
     private fun estimateDecay(word: Word): Float{
-        val decay = C * exp(word.previous_activation)+ estimateAlpha(word)
+        val decay = C * exp(word.previous_activation)+ word.alpha
+
         return decay
     }
 
@@ -87,9 +90,9 @@ class SpacingModel() {
     fun estimateAlpha(word: Word): Float {
 
         //if less than 3 encounters, use default alpha
-        if (word.encounters.size < 3){
-            return DEFAULT_ALPHA.toFloat()
-        }
+//        if (word.encounters.size < 3){
+//            return DEFAULT_ALPHA.toFloat()
+//        }
 
 
 
@@ -98,6 +101,7 @@ class SpacingModel() {
         var reading_time = get_reading_time(word.english)
         var estimated_reaction_time = estimate_reaction_time_from_activation(word.activation, reading_time)
         var estimated_difference = estimated_reaction_time - normalized_reaction_time()
+        println(estimated_difference.toString() +"?????????????????????????/")
        // declare a0 and a1
         var a0 = 0F
         var a1 = 0F
@@ -150,7 +154,7 @@ class SpacingModel() {
             // The new alpha estimate is the average value in the remaining bracket
             return((a0 + a1) / 2)
         }
-        return DEFAULT_ALPHA.toFloat()
+        return a1
     }
 
     fun get_reading_time(text: String): Float{
@@ -166,6 +170,8 @@ class SpacingModel() {
     }
 
     fun estimate_reaction_time_from_activation(activation: Float, readingTime: Float): Float{
+        println(" estimated reading times" +  ((F* exp(-activation) + (readingTime / 1000))*1000).toFloat())
+
         return ((F* exp(-activation) + (readingTime / 1000))*1000).toFloat()
     }
 

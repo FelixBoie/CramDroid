@@ -1,8 +1,6 @@
 package models;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import com.example.cramdroid.R;
@@ -33,7 +31,6 @@ public class WorkWithCSV {
     var previous_alpha : Float = 0.3F
     var decay = 0.3F
     */
-
 
     String FILENAME = "saveWords.csv";
     // words are saved in a long string, one word per line, the pos_ variables define the position they are on

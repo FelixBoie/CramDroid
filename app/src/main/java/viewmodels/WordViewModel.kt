@@ -63,18 +63,19 @@ class WordViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSeenWords(currentWord:Word, currentTime: Long){
         //update model to current word
         curr_word = currentWord
-        //add current word to seen words if isn't there already
-        if (!curr_word.prev_seen){
-            currentWord.prev_seen = true
-            seenWords.add(curr_word)
-            //words.removeIf{it.english == curr_word.english}
-        }
         //add encounter of the word
         for (i in seenWords) {
             if (i.english == currentWord.english) {
                 i.encounters.add(Encounter(currentWord.activation, spacingModel.trialInformation.reactionTime, currentTime.toFloat()))
             }
         }
+        //add current word to seen words if isn't there already
+        if (!curr_word.prev_seen){
+            currentWord.prev_seen = true
+            seenWords.add(curr_word)
+            //words.removeIf{it.english == curr_word.english}
+        }
+
     }
     fun askForNewWord(){
         //first
