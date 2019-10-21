@@ -13,6 +13,7 @@ import android.graphics.Color
 import classes.StudyNotificationPublisher
 import classes.Word
 import models.SchedullingModel
+import models.SpacingModel
 import models.WorkWithCSV
 
 
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 //        var delay = SchedullingModel.getNextMessageInXHours_percentileSpacing()
 
         // schedule for CONSTANT spacing
-        var delay = SchedullingModel.nextMessageInXHours_constantSpacing()
+        var delay = SchedullingModel.nextMessageInXHours_constantSpacing(this.applicationContext)
 
         println("Next schedule in (hours):$delay")
 
@@ -73,6 +74,7 @@ class MainActivity : AppCompatActivity() {
             println("Scheduling...")
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
         }
+        SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
     }
 
     private fun getNotification(content: String): Notification {

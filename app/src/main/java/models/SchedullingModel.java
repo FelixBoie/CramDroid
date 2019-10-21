@@ -1,5 +1,8 @@
 package models;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,11 +19,29 @@ public class SchedullingModel {
     private int blockedTimeStart  = 20; // the hour of the day
     private int blockedTimeStop = 8;    // the hour of the day
 
-    private int numberOfTestsLeft = 4;
+    private int numberOfTestsLeft = 0; //getNumberOfTestsLeft();
+    SharedPreferences generalPref; // needed to save the amount of study times left
 
     public SchedullingModel() {
         updateLastTest();
     }
+
+    private void getNumberOfTestsLeft(Context context){
+
+        generalPref = context.getSharedPreferences("timesLeftToStudy",Context.MODE_PRIVATE);
+        String timesLeftToStudyString = generalPref.getString("timesLeftToStudy","4"); // in first part specify the key
+        this.numberOfTestsLeft = Integer.parseInt(timesLeftToStudyString);
+        System.out.println("getNumberOfTestsLeft: " + numberOfTestsLeft);
+
+    }
+    public void reduceNumberOfTestsLeft(Context context){
+        //reduce the number of Tests left
+        SharedPreferences.Editor editor = generalPref.edit();
+        numberOfTestsLeft = numberOfTestsLeft-1;
+        editor.putString("timesLeftToStudy",String.valueOf(numberOfTestsLeft));
+        editor.apply();
+    }
+
 
     // testing schedule
     public int getNextMessageInMS_test() {
@@ -32,8 +53,9 @@ public class SchedullingModel {
         return adjustSentMessageInXHours(getNextMessageInXHours_bySpacingModel());
     }
 
-    public int nextMessageInXHours_constantSpacing(){
+    public int nextMessageInXHours_constantSpacing(Context context){
         updateLastTest();
+        getNumberOfTestsLeft(context);
         return adjustSentMessageInXHours(getNextMessageInXHours_byConstantSpacing());
     }
 
