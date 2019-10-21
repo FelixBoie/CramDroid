@@ -37,26 +37,42 @@ class MainActivity : AppCompatActivity() {
         scheduleNotification(getNotification("This would be a perfect time to study!"))
     }
     private fun scheduleNotification(notification: Notification) {
-        val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
-        notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
-        notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        // calculate Delay
+        // decide here between different schedule methods
         var SchedullingModel = SchedullingModel()
         SchedullingModel.updateLastTest()
-        val delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
-        //val delay = spacingModel.nextMessageInXHours*60*60*1000 // delay in milliseconds
+
+        // schedule just for TESTING
+//         var delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
+
+        // schdedule for PERCENTILE Spacing
+//        var delay = SchedullingModel.getNextMessageInXHours_percentileSpacing()
+
+        // schedule for CONSTANT spacing
+        var delay = SchedullingModel.nextMessageInXHours_constantSpacing()
+
+        println("Next schedule in (hours):$delay")
+
+        delay *= 60 * 60 * 1000 // delay in milliseconds
+
+        //only do something if there is not a negative delay
+        if (delay >= 0) {
+
+            val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
+            notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
+            notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
 
 
-        val futureInMillis = SystemClock.elapsedRealtime() + SchedullingModel.nextMessageInXHours*60*60*1000 // delay in milliseconds
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        println("Scheduling...")
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
+            val futureInMillis = SystemClock.elapsedRealtime() + delay // delay in milliseconds
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            println("Scheduling...")
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
+        }
     }
 
     private fun getNotification(content: String): Notification {

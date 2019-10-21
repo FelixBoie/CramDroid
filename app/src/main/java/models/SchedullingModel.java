@@ -11,14 +11,90 @@ import classes.timePoint;
 public class SchedullingModel {
 
     private timePoint lastStudied  = new timePoint(2000,1,1,1,0,0,0); // just initialize
-    private timePoint finalTest  = new timePoint(2019,10,11,12, 0,0,0); // day of the final test
+    private timePoint finalTest  = new timePoint(2019,10,28,22, 0,0,0); // day of the final test
 
     private int blockedTimeStart  = 20; // the hour of the day
     private int blockedTimeStop = 8;    // the hour of the day
 
+    private int numberOfTestsLeft = 4;
+
     public SchedullingModel() {
         updateLastTest();
     }
+
+    // testing schedule
+    public int getNextMessageInMS_test() {
+        return 20000;
+    }
+
+    public int getNextMessageInXHours_percentileSpacing(){
+        updateLastTest();
+        return adjustSentMessageInXHours(getNextMessageInXHours_bySpacingModel());
+    }
+
+    public int nextMessageInXHours_constantSpacing(){
+        updateLastTest();
+        return adjustSentMessageInXHours(getNextMessageInXHours_byConstantSpacing());
+    }
+
+    // schedule based on PERCENTILE spacing
+    private int getNextMessageInXHours_bySpacingModel() {
+        int nextMessageInXHours = 0;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // set times to LocalDateTime
+            LocalDateTime tmp_lastStudied = LocalDateTime.of(lastStudied.year, Month.of(lastStudied.month), lastStudied.day, lastStudied.hour, 0);
+            LocalDateTime tmP_finalStudy = LocalDateTime.of(finalTest.year,finalTest.month,finalTest.day,finalTest.hour,0);
+
+            Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
+
+            int difference_hours = (int) (duration.getSeconds()/(60*60));
+            nextMessageInXHours = (int) (difference_hours * 0.4); // used 40%, as we only look for one week
+        }
+        return nextMessageInXHours;
+    }
+
+    // schedule based on CONSTANT spacing
+    private int getNextMessageInXHours_byConstantSpacing() {
+        int nextMessageInXHours = 0;
+
+        if (numberOfTestsLeft == 0) {
+            // should not test any more
+            return -1;
+
+        }else if(numberOfTestsLeft == 1) {
+            // should only test once/ should test 24 h before the final test,
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                LocalDateTime tmp_lastStudied = LocalDateTime.of(lastStudied.year, Month.of(lastStudied.month), lastStudied.day, lastStudied.hour, 0);
+                LocalDateTime tmP_finalStudy = LocalDateTime.of(finalTest.year, finalTest.month, finalTest.day, finalTest.hour, 0);
+
+                Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
+
+                if (duration.toHours() < 24){
+                    // then study now
+                    return 0;
+                } else {
+                    // then study 24 hours before final test
+                    return (int) (duration.toHours()-24);
+                }
+            }
+
+        }else {
+            // needs to test multiple times
+        }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                // set times to LocalDateTime
+                LocalDateTime tmp_lastStudied = LocalDateTime.of(lastStudied.year, Month.of(lastStudied.month), lastStudied.day, lastStudied.hour, 0);
+                LocalDateTime tmP_finalStudy = LocalDateTime.of(finalTest.year, finalTest.month, finalTest.day, finalTest.hour, 0);
+
+                Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
+
+                int difference_hours = (int) (duration.getSeconds() / (60 * 60));
+                nextMessageInXHours = (int) ((difference_hours - 24) / (numberOfTestsLeft - 1)); // numberOfTestLeft ==1 would lead to an error
+            }
+        return nextMessageInXHours;
+    }
+
 
     public void updateLastTest() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -32,58 +108,23 @@ public class SchedullingModel {
         }
     }
 
-    public int getNextMessageInMS_test(){
-        return 20000;
-    }
-    public int getNextMessageInXHours(){
-        updateLastTest();
-        return adjustSentMessageInXHours(getNextMessageInXHours_bySpacingModel());
-    }
 
-    public timePoint getNextMessageTimePoint(){
-        timePoint nextMessageTimePoint;
-        updateLastTest();
-        nextMessageTimePoint = lastStudied;
-        nextMessageTimePoint.addHours(getNextMessageInXHours());
-        return nextMessageTimePoint;
-    }
-
-    // a simple version, only gives back a day
-    int getNextMessageInXHours_bySpacingModel() {
-        int nextMessageInXHours = 0;
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            // set times to LocalDateTime
-            LocalDateTime tmp_lastStudied = LocalDateTime.of(lastStudied.year, Month.of(lastStudied.month), lastStudied.day, lastStudied.hour, 0);
-            LocalDateTime tmP_finalStudy = LocalDateTime.of(finalTest.year,finalTest.month,finalTest.day,finalTest.hour,0);
-
-            Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
-
-            int difference_hours = (int) (duration.getSeconds()/(60*60));
-            nextMessageInXHours = (int) (difference_hours * 0.4);
-        }
-        //System.out.println("spacing model start:" + nextMessageInXHours);
-        return nextMessageInXHours;
-    }
-
+    // adjust the time, to not sent notification outside the selected ours
     int adjustSentMessageInXHours(int suggestedHours_bySpacingModel) {
         // check if time is blocked
         int suggestedTime_hours = (lastStudied.hour + suggestedHours_bySpacingModel )% 24;
         if(suggestedTime_hours < blockedTimeStop) {
             // to early in the day
             suggestedHours_bySpacingModel = suggestedHours_bySpacingModel + (blockedTimeStop - suggestedTime_hours);
-            //System.out.println("too early");
         } else if(suggestedTime_hours > blockedTimeStart) {
-            suggestedHours_bySpacingModel  = suggestedHours_bySpacingModel + (24-suggestedTime_hours) + blockedTimeStart;
-            //System.out.println("too late");
+            suggestedHours_bySpacingModel  = suggestedHours_bySpacingModel + (24-suggestedTime_hours) + blockedTimeStop;
 
         }
-        //System.out.println("spacing model adjusted:" + suggestedHours_bySpacingModel);
         return suggestedHours_bySpacingModel;
     }
 
     // set final test time
-    public void finalTestTime(int year, int month, int day, int hour){
+    public void setFinalTestTime(int year, int month, int day, int hour){
         finalTest.year =year;
         finalTest.month =month;
         finalTest.day =day;
