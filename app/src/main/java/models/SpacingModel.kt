@@ -56,6 +56,7 @@ class SpacingModel() {
         lowestActivationWord.activation = Float.POSITIVE_INFINITY
         var lowest_activation  = Float.POSITIVE_INFINITY
         for (i in seen_words){
+            i.previous_alpha = i.alpha // ??? needs to be added
             i.alpha = estimateAlpha(i)
             i.activation = calcActivationOfOneWord(i)
             if (i.activation < lowest_activation) {
@@ -98,6 +99,7 @@ class SpacingModel() {
 
         //fit the alpha
         var a_fit = word.previous_alpha
+        println("a_fit:"+a_fit.toString())
         var reading_time = get_reading_time(word.english)
         var estimated_reaction_time = estimate_reaction_time_from_activation(word.activation, reading_time)
         var estimated_difference = estimated_reaction_time - normalized_reaction_time()
@@ -108,7 +110,7 @@ class SpacingModel() {
 
         if (estimated_difference < 0) {
             // Estimated RT was too short (estimated activation too high), so actual decay was larger
-             a0 = a_fit
+            a0 = a_fit
             a1 = (a_fit + 0.05).toFloat()
         }
         else {
