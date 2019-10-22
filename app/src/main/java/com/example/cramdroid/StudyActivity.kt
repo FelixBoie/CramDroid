@@ -32,6 +32,7 @@ class StudyActivity : AppCompatActivity() {
         answer.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
         val button = findViewById<Button>(R.id.study_submit_button)
         val feedback = findViewById<TextView>(R.id.study_feedback)
+        val correction = findViewById<TextView>(R.id.study_correction)
         //var trialInformation = TrialInformation(item, 0, false)
         /*model.getWords().observe(this, Observer<List<Word>> {
             words: List<Word>? ->  print(words)
@@ -45,6 +46,7 @@ class StudyActivity : AppCompatActivity() {
         feedback.visibility = View.VISIBLE
         feedback.text = item.dutch
         feedback.setTextColor(Color.BLUE)
+        correction.visibility = View.INVISIBLE
         itemText.setTextColor(Color.BLUE)
         //model.updateWordList()
         answer.isEnabled = false
@@ -75,7 +77,9 @@ class StudyActivity : AppCompatActivity() {
                 } else {
                     feedback.text = "False!"
                     feedback.setTextColor(resources.getColor(R.color.colorFalse))
-                    answer.setText(item.dutch)
+                    correction.text = item.dutch
+                    correction.visibility = View.VISIBLE
+                    //answer.setText(item.dutch)
                     answer.setTextColor(resources.getColor(R.color.colorFalse))
                     //add the information of current trial to the model
                     model.spacingModel.trialInformation.addTrialInformation(item,(SystemClock.elapsedRealtime()-currentTime).toFloat(), false )
@@ -97,6 +101,7 @@ class StudyActivity : AppCompatActivity() {
                 item = model.curr_word
                 itemText.text = item.english
                 answer.setText("")
+                correction.visibility = View.INVISIBLE
                 if (item.prev_seen){
                     actionConfirm = true
                     answer.isEnabled = true
