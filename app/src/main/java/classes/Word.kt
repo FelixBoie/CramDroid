@@ -22,7 +22,7 @@ class Word(
     }
 
     fun setStringAsWord(activation: Float, prev_seen: Boolean, previous_activation :Float, alpha : Float, previous_alpha : Float, decay: Float, encounter: ArrayList<Encounter>){
-        this.activation = activation
+        this.activation = activation // only keeps the final activation
         this.prev_seen = prev_seen
         this.encounters = encounter
         this.previous_activation = previous_activation
