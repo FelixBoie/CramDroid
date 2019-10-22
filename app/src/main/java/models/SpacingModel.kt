@@ -244,10 +244,10 @@ class SpacingModel() {
         var activation = 0.0
 
         println("Number of encounters: " + encounters.size)
-        for(e in encounters){
+        for(e in 0..(encounters.size-1)){
 
-           println("added activation value:" + ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay))
-           activation += ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay)
+           println("added activation value:" + ((SystemClock.elapsedRealtime() - encounters[e].time_of_encounter)/1000).pow(-encounters[e].decay))
+           activation += ((SystemClock.elapsedRealtime() - encounters[e].time_of_encounter)/1000).pow(-encounters[e].decay)
         }
 //        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + activation )
 //
