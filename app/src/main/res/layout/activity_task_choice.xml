@@ -37,7 +37,7 @@
         android:layout_marginStart="79dp"
         android:layout_marginTop="55dp"
         android:layout_marginEnd="66dp"
-        android:text="Dutch Vocabulary"
+        android:text="Swahili Vocabulary"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintEnd_toStartOf="@+id/start_recommended_button"
         app:layout_constraintStart_toStartOf="parent"
