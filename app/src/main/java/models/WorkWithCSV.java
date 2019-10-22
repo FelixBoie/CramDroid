@@ -45,11 +45,11 @@ public class WorkWithCSV {
     public ArrayList<Word> general_readCsv(Context context){
         File file = new File(context.getFilesDir(),FILENAME);
         if(file.exists()){
-            System.out.println("File already exists");
+//            System.out.println("File already exists");
             return readCSV_priorWritten(context);
 
         } else {
-            System.out.println("File does not exit");
+//            System.out.println("File does not exit");
             return initializeWords_readInCsv(context);
         }
     }

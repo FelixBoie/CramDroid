@@ -17,7 +17,7 @@ class SpacingModel() {
     //TODO: Implement ENCOUNTERS
     var trialInformation = TrialInformation(nextAction, 0F, false)
    // # Model constants
-   // val LOOKAHEAD_TIME = 15000
+    val LOOKAHEAD_TIME = 15000
     val FORGET_THRESHOLD : Float = -0.8F
     val DEFAULT_ALPHA = 0.3
     val C : Float= 0.25F
@@ -28,6 +28,7 @@ class SpacingModel() {
 //        currentWord = word
 //    }
 
+    //TODO: ??? Felix: possible problem here, could show a word twice behind each other
     fun selectAction(seen_words: MutableList<Word>): Word{
 //        for(word in seen_words){
 //            println("3 Word: " + word.english)
@@ -52,30 +53,32 @@ class SpacingModel() {
 
     //calculate Lowest activation of all seen words
     fun calculateLowestActivations(seen_words: MutableList<Word>): Word{
+        println("length of seen_words: " + seen_words.toString())
         var lowestActivationWord = Word("default", "default")
         lowestActivationWord.activation = Float.POSITIVE_INFINITY
         var lowest_activation  = Float.POSITIVE_INFINITY
         for (i in seen_words){
+            println("Word in seen words " + i.english)
             i.previous_alpha = i.alpha // ??? needs to be added
             i.alpha = estimateAlpha(i)
             i.activation = calcActivationOfOneWord(i)
             if (i.activation < lowest_activation) {
-                println("activation: " + i.english + "  " + i.activation)
+//                println("activation: " + i.english + "  " + i.activation)
                 lowest_activation = i.activation
                 lowestActivationWord = i
             }
-
         }
-
         return lowestActivationWord
-
     }
 
     //calculate activation of one word
     private fun calcActivationOfOneWord(word: Word): Float{
+        println("Should only be called once per word")
         val decay = estimateDecay(word)
+        println("decay is:" + decay)
         word.decay = decay
-        word.activation = calculate_activation_from_encounters(word.encounters, SystemClock.elapsedRealtime().toFloat())
+        var currentTimeWithLookAhead = SystemClock.elapsedRealtime() + LOOKAHEAD_TIME
+        word.activation = calculate_activation_from_encounters(word.encounters, currentTimeWithLookAhead.toFloat())
         return word.activation
 
     }
@@ -83,7 +86,6 @@ class SpacingModel() {
     //estimate the decay of one word pair
     private fun estimateDecay(word: Word): Float{
         val decay = C * exp(word.previous_activation)+ word.alpha
-
         return decay
     }
 
@@ -99,11 +101,11 @@ class SpacingModel() {
 
         //fit the alpha
         var a_fit = word.previous_alpha
-        println("a_fit:"+a_fit.toString())
+//        println("a_fit:"+a_fit.toString())
         var reading_time = get_reading_time(word.english)
         var estimated_reaction_time = estimate_reaction_time_from_activation(word.activation, reading_time)
         var estimated_difference = estimated_reaction_time - normalized_reaction_time()
-        println(estimated_difference.toString() +"?????????????????????????/")
+//        println("estimated_difference" + estimated_difference.toString())
        // declare a0 and a1
         var a0 = 0F
         var a1 = 0F
@@ -172,7 +174,7 @@ class SpacingModel() {
     }
 
     fun estimate_reaction_time_from_activation(activation: Float, readingTime: Float): Float{
-        println(" estimated reading times" +  ((F* exp(-activation) + (readingTime / 1000))*1000).toFloat())
+        println(" estimated reaction times" +  ((F* exp(-activation) + (readingTime / 1000))*1000).toFloat())
 
         return ((F* exp(-activation) + (readingTime / 1000))*1000).toFloat()
     }
@@ -227,7 +229,10 @@ class SpacingModel() {
         return rt_errors
     }
 
+
+    //TODO: ??? Felix check this one
     fun calculate_activation_from_encounters(encounters: MutableList<Encounter>, time_of_encounter: Float): Float{
+        // ???
         var included_encounters = mutableListOf<Encounter>()
         included_encounters.add(Encounter(0F,0F,0F))
         included_encounters.removeAt(0)
@@ -243,7 +248,9 @@ class SpacingModel() {
 
         var activation = 0.0
 
+        println("Number of encounters: " + included_encounters.size)
         for(e in included_encounters){
+           println("added activation value:" + ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay))
            activation += ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay)
         }
 //        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111    " + activation )

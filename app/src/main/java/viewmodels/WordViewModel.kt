@@ -20,7 +20,7 @@ class WordViewModel(application: Application) : AndroidViewModel(application) {
     val words = loadWords()
     val spacingModel = SpacingModel()
     var curr_word = getRandomWord()
-    private val seenWords = MutableList<Word>(1){curr_word} // ??? maybe we can change this one to ArrayList, I do not know how to work with mutable list in java
+    private val seenWords = MutableList<Word>(0){curr_word} // needs to start with no words, otherwise we have first word double in there
 
 
     /*fun getWords(): LiveData<MutableList<Word>> {
@@ -34,7 +34,7 @@ class WordViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun writeToCsvFile(){
-        System.out.println("Hurra, wrote to csv file!!!!!!!!!!!!!!!!!!!!!!!")
+//        System.out.println("Hurra, wrote to csv file!!!!!!!!!!!!!!!!!!!!!!!")
         var test = WorkWithCSV()
         test.writeCSV(getApplication<Application>().applicationContext,words)
     }
@@ -54,7 +54,17 @@ class WordViewModel(application: Application) : AndroidViewModel(application) {
 //    }
 
     fun getRandomWord(): Word {
-        return words[Random.nextInt(words.size)]
+
+        var wordsNotSeen = words.filter { word: Word ->  !word.prev_seen}  // create a list of words not seen
+
+
+        if (wordsNotSeen.size <=0){ // all words have been seen; TODO: needs to be changed to only take lowest activationword
+            println("there are no more unseen words")
+            return words[Random.nextInt(words.size)]
+        } else { // there are still words not seen
+            println("there are still unseen words")
+            return wordsNotSeen[Random.nextInt(wordsNotSeen.size)]
+        }
     }
 
 

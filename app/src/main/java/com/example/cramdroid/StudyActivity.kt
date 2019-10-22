@@ -25,7 +25,6 @@ class StudyActivity : AppCompatActivity() {
 
         val model = ViewModelProviders.of(this).get(WordViewModel::class.java)
         var currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
-        println("!!!!!!!!!!!!!!!!!!!!!!!!!1" + currentTime)
         var actionConfirm = false
         var item = model.curr_word
         val itemText = findViewById<TextView>(R.id.study_item)
@@ -52,10 +51,12 @@ class StudyActivity : AppCompatActivity() {
         button.text = "Next"
 
         button.setOnClickListener {
+            println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Click!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             itemText.setTextColor(Color.BLACK)
 
             // every time the button is pressed, add the information to the csv file
-            model.writeToCsvFile()
+            // ??? needs to be added again?????
+            //model.writeToCsvFile()
 
 
             //currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
