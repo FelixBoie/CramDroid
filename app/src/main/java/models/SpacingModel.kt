@@ -58,10 +58,11 @@ class SpacingModel() {
         var lowest_activation  = Float.POSITIVE_INFINITY
         for (i in seen_words){
             println("Word in seen words " + i.english)
-            i.previous_alpha = i.alpha // ??? needs to be added
-            i.alpha = estimateAlpha(i)
             i.previous_activation = i.activation
             i.activation = calcActivationOfOneWord(i)
+
+            i.previous_alpha = i.alpha // ??? needs to be added
+            i.alpha = estimateAlpha(i)
 
             if (i.activation < lowest_activation) {
 //                println("activation: " + i.english + "  " + i.activation)
@@ -74,13 +75,14 @@ class SpacingModel() {
 
     //calculate activation of one word
     private fun calcActivationOfOneWord(word: Word): Float{
-        println("Should only be called once per word")
+        println("Should only be called once per word. Word: " + word.english)
+        var currentTimeWithLookAhead = SystemClock.elapsedRealtime() + LOOKAHEAD_TIME
+        word.activation = calculate_activation_from_encounters(word.encounters, currentTimeWithLookAhead.toFloat())
         for (e in word.encounters){
             e.decay = estimateDecay(e, word.alpha)
             println("decay per encounter : " + e.decay)
         }
-        var currentTimeWithLookAhead = SystemClock.elapsedRealtime() + LOOKAHEAD_TIME
-        word.activation = calculate_activation_from_encounters(word.encounters, currentTimeWithLookAhead.toFloat())
+        println("Final activation for word: " + word.english + " activation: "+ word.activation)
         return word.activation
 
     }
