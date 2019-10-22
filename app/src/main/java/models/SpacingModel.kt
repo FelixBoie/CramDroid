@@ -33,7 +33,6 @@ class SpacingModel() {
 //        for(word in seen_words){
 //            println("3 Word: " + word.english)
 //            println("Activation: " + word.activation)
-//            println("Decay: " + word.decay)
 //            for (e in word.encounters){
 //                println("Encounter: " + e.time_of_encounter  + "   " + e.reaction_time + "   " + e.activation)
 //            }
@@ -61,7 +60,9 @@ class SpacingModel() {
             println("Word in seen words " + i.english)
             i.previous_alpha = i.alpha // ??? needs to be added
             i.alpha = estimateAlpha(i)
+            i.previous_activation = i.activation
             i.activation = calcActivationOfOneWord(i)
+
             if (i.activation < lowest_activation) {
 //                println("activation: " + i.english + "  " + i.activation)
                 lowest_activation = i.activation
@@ -74,9 +75,10 @@ class SpacingModel() {
     //calculate activation of one word
     private fun calcActivationOfOneWord(word: Word): Float{
         println("Should only be called once per word")
-        val decay = estimateDecay(word)
-        println("decay is:" + decay)
-        word.decay = decay
+        for (e in word.encounters){
+            e.decay = estimateDecay(e, word.alpha)
+            println("decay per encounter : " + e.decay)
+        }
         var currentTimeWithLookAhead = SystemClock.elapsedRealtime() + LOOKAHEAD_TIME
         word.activation = calculate_activation_from_encounters(word.encounters, currentTimeWithLookAhead.toFloat())
         return word.activation
@@ -84,8 +86,8 @@ class SpacingModel() {
     }
 
     //estimate the decay of one word pair
-    private fun estimateDecay(word: Word): Float{
-        val decay = C * exp(word.previous_activation)+ word.alpha
+    private fun estimateDecay(encounter: Encounter, alpha: Float): Float{
+        val decay = C * exp(encounter.activation)+ alpha
         return decay
     }
 
@@ -232,24 +234,16 @@ class SpacingModel() {
 
     //TODO: ??? Felix check this one
     fun calculate_activation_from_encounters(encounters: MutableList<Encounter>, time_of_encounter: Float): Float{
-        // ???
-        var included_encounters = mutableListOf<Encounter>()
-        included_encounters.add(Encounter(0F,0F,0F))
-        included_encounters.removeAt(0)
-            for (e in encounters){
-                if (e.time_of_encounter < time_of_encounter){
-                    included_encounters.add(e)
-                }
-            }
 
-        if (included_encounters.size == 0 ){
+        if (encounters.size == 0 ){
             return(-9999999999999).toFloat()
         }
 
         var activation = 0.0
 
-        println("Number of encounters: " + included_encounters.size)
-        for(e in included_encounters){
+        println("Number of encounters: " + encounters.size)
+        for(e in encounters){
+
            println("added activation value:" + ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay))
            activation += ((SystemClock.elapsedRealtime() - e.time_of_encounter)/1000).pow(-e.decay)
         }
