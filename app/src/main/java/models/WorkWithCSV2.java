@@ -74,7 +74,6 @@ public class WorkWithCSV2 {
                 InputStreamReader isr = new InputStreamReader(fis);
                 BufferedReader br = new BufferedReader(isr);
                 String oneLine;
-                System.out.println("test1");
 
                 while ((oneLine = br.readLine()) != null) {
                     String[] parts = oneLine.split(",");
