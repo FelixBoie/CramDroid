@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import classes.Fact
 import classes.Response
 import classes.TrialInformation
 import classes.Word
@@ -30,7 +31,7 @@ class StudyActivity : AppCompatActivity() {
         var startOfTrialTime = SystemClock.elapsedRealtime() // saves the time the the trials starts
         var currentTime =  SystemClock.elapsedRealtime()
         var variableSelectingLayout = 1 // can be 0= show trial, 1 = learn trial and 2 feedback trial
-        var item = model.getFact(currentTime)
+        var item = model.getFact(currentTime,  Fact("bullshit","bullshit")) // just needs a fact that will never appear
         val itemText = findViewById<TextView>(R.id.study_item)
         val answer = findViewById<EditText>(R.id.study_answer)
         answer.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -165,7 +166,7 @@ class StudyActivity : AppCompatActivity() {
                 }
 
                 // get a new item
-                item = model.getFact(currentTime)
+                item = model.getFact(currentTime,item.first)
                 println("new item"+item)
                 // if the item is new, show a test, otherwise run learning session
                 if (item.second){

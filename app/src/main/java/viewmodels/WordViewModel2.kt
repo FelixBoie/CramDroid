@@ -20,11 +20,6 @@ class WordViewModel2 (application: Application) : AndroidViewModel(application) 
     }
 
 
-
-    /*fun getWords(): LiveData<MutableList<Word>> {
-        return words
-    }*/
-
     private fun loadFacts() {
         // facts are working, responses can only be added later
         spacingModel2.addAllFacts(WorkWithCSV.readInFacts(getApplication<Application>().applicationContext))
@@ -47,9 +42,9 @@ class WordViewModel2 (application: Application) : AndroidViewModel(application) 
 
     }
 
-    fun getFact(time:Long):Pair<Fact,Boolean>{
+    fun getFact(time:Long, previous_fact:Fact):Pair<Fact,Boolean>{
         // get a new fact, and if it has been already seen
-        val fact = spacingModel2.get_next_fact(time)
+        val fact = spacingModel2.get_next_fact(time,previous_fact)
         return fact
     }
 

@@ -60,8 +60,8 @@ class SpacingModel2 {
         responses.add(newResponse)
     }
 
-    // stuck
-    fun get_next_fact(current_time:Long):Pair<Fact,Boolean> {
+    // addad that the prior fact is taken into consideration, so that it is not called again.
+    fun get_next_fact(current_time:Long,previous_fact:Fact):Pair<Fact,Boolean> {
         /*
         Returns a tuple containing the fact that needs to be repeated most urgently and a boolean indicating whether this fact is new (True) or has been presented before (False).
         If none of the previously studied facts needs to be repeated right now, return a new fact instead.
@@ -71,8 +71,24 @@ class SpacingModel2 {
 
         var fact_activations = ArrayList<Pair<Fact,Float>>()
         for(f in facts){
-            fact_activations.add(Pair(f,calculate_activation(current_time+LOOKAHEAD_TIME,f)))
+            //only consider facts that are not the same as the previous one
+            if (f != previous_fact) {
+                fact_activations.add(
+                    Pair(
+                        f,
+                        calculate_activation(current_time + LOOKAHEAD_TIME, f)
+                    )
+                )
+            }
         }
+        /*
+        // check activations
+        for(fact_activation in fact_activations){
+            println("fact:" + fact_activation.first.question + "activation:" + fact_activation.second)
+        }
+
+         */
+
 
         var seen_facts = ArrayList<Pair<Fact,Float>>()
         var not_seen_facts = ArrayList<Pair<Fact,Float>>()
