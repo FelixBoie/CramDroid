@@ -1,5 +1,6 @@
 package com.example.cramdroid
 
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,13 +19,20 @@ import classes.TrialInformation
 import classes.Word
 import viewmodels.WordViewModel
 import viewmodels.WordViewModel2
+import androidx.core.os.HandlerCompat.postDelayed
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.os.Handler
+import models.WorkWithCSV2
+
 
 class StudyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_study)
-
 
         val model = ViewModelProviders.of(this).get(WordViewModel2::class.java)
 
@@ -55,6 +63,23 @@ class StudyActivity : AppCompatActivity() {
         answer.isEnabled = false
         button.text = "Next"
         itemText.setTextColor(Color.BLACK)
+
+
+        // closes the view after X time; needs to be called after the model
+        val finishTime = 5L // in seconds
+        val handler = Handler()
+        handler.postDelayed(Runnable {
+            println("Stop Study Activity")
+            // save to csv
+            model.writeToCsvFile(model.spacingModel2.responses)
+            // write email
+            sendOutputViaEmail()
+
+
+            //set next schedule
+
+            this.finish() }, finishTime * 1000)
+
 
 
 
@@ -179,6 +204,29 @@ class StudyActivity : AppCompatActivity() {
         }
 
 
+    }
+    fun sendOutputViaEmail() {
+        // taken from https://www.youtube.com/watch?v=tZ2YEw6SoBU
+        val recipientList = "fbfelix@web.de,e.n.meijer@student.rug.nl,S.Steffen.2@student.rug.nl" //add here your email address, with "," between them
+        val recipients = recipientList.split(",".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray() // email addresses to sent to
+
+        val subject = "UserModel_data"
+
+        var test = WorkWithCSV2()
+
+        val message = test.getCSVResponsesAsString(this.applicationContext) // reads in the output from the trial
+
+        println("could read in the message")
+        println(message)
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_EMAIL, recipients)
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject)
+        intent.putExtra(Intent.EXTRA_TEXT, message)
+
+        intent.type = "message/rfc822" // only use Email apps
+
+        startActivity(Intent.createChooser(intent, "Choose an email client"))
     }
 
 }

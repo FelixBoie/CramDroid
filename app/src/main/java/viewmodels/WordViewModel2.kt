@@ -51,4 +51,5 @@ class WordViewModel2 (application: Application) : AndroidViewModel(application) 
     fun register_response(fact:Fact,time:Long,_reactionTime:Float,_correct:Boolean){
         spacingModel2.register_response(Response(fact,time, _reactionTime,_correct))
     }
+
 }

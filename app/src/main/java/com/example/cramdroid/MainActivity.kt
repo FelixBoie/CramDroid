@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
     // Save the important information for later analysis
     fun sendOutputViaEmail(view: View) {
         // taken from https://www.youtube.com/watch?v=tZ2YEw6SoBU
-        val recipientList = "fbfelix@web.de" //add here your email address, with "," between them
+        val recipientList = "fbfelix@web.de,e.n.meijer@student.rug.nl,S.Steffen.2@student.rug.nl" //add here your email address, with "," between them
         val recipients = recipientList.split(",".toRegex()).dropLastWhile { it.isEmpty() }
             .toTypedArray() // email addresses to sent to
 
