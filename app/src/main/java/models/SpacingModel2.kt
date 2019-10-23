@@ -4,6 +4,7 @@ import classes.*
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
+import kotlin.random.Random
 
 class SpacingModel2 {
 
@@ -135,8 +136,8 @@ class SpacingModel2 {
             return Pair(weakest_fact.first, false)
 
         }
-        // If none of the previously seen facts has an activation below the threshold, return a new fact
-        return Pair(not_seen_facts.get(0).first, true)
+        // If none of the previously seen facts has an activation below the threshold, return a new random fact
+        return Pair(not_seen_facts[(Random.nextInt(0, not_seen_facts.size-1))].first, true)
     }
 
 
