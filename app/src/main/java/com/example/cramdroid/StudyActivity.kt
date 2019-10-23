@@ -72,7 +72,7 @@ class StudyActivity : AppCompatActivity() {
 
 
         // closes the view after X time; needs to be called after the model
-        val finishTime = 10L // in seconds ; should be 10 min
+        val finishTime = 2L*60 // in seconds ; should be 10 min
         val handler = Handler()
         handler.postDelayed(Runnable {
             println("Stop Study Activity")
@@ -92,6 +92,10 @@ class StudyActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             println("responses for after click:"+ model.spacingModel2.responses)
+
+            // update clock
+            currentTime = SystemClock.elapsedRealtime()
+
 
             println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Click!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             // read in response to csv; just for savefy, if the user exists the studying too early
@@ -129,9 +133,6 @@ class StudyActivity : AppCompatActivity() {
 
             } else if(variableSelectingLayout==1) {
                 // show a learning session
-
-                // save when a word is presented
-                startOfTrialTime = SystemClock.elapsedRealtime()
 
                 //Set up the right layout
                 // set question (blue or black)
@@ -213,6 +214,9 @@ class StudyActivity : AppCompatActivity() {
                     variableSelectingLayout = 1
                 }
             }
+
+            // save when a word is presented
+            startOfTrialTime = SystemClock.elapsedRealtime()
         }
 
 
