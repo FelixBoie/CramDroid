@@ -25,6 +25,7 @@ import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.os.Handler
+import android.view.inputmethod.InputMethodManager
 import androidx.core.app.NotificationCompat
 import classes.*
 import models.SchedullingModel
@@ -84,7 +85,7 @@ class StudyActivity : AppCompatActivity() {
             //set next schedule
             //ToDo: here the code for schedulling needs to be added
 
-            this.finish() }, finishTime * 1000)
+            this.finish() }, finishTime * 60 * 1000)
 
 
 
@@ -147,9 +148,12 @@ class StudyActivity : AppCompatActivity() {
                 correction.text = item.first.answer
                 correction.setTextColor(Color.BLUE)
 
+
+
                 // set answer
                 answer.setText("")
                 answer.isEnabled = true
+                answer.showKeyboard()
                 answer.setTextColor(Color.BLACK)
 
                 //set button
@@ -214,6 +218,12 @@ class StudyActivity : AppCompatActivity() {
 
     }
 
+    fun View.showKeyboard() {
+        this.requestFocus()
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+    }
+
     private fun scheduleNotification(notification: Notification) {
         // decide here between different schedule methods
         var SchedullingModel = SchedullingModel()
@@ -233,7 +243,7 @@ class StudyActivity : AppCompatActivity() {
         delay *= 60 * 60 * 1000 // delay in milliseconds
 
         // Just for testing, delete row later
-        delay = 1000
+        delay = 100000
 
         //only do something if there is not a negative delay
         if (delay >= 0) {
