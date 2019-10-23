@@ -62,8 +62,12 @@ class StudyActivity : AppCompatActivity() {
         itemText.setTextColor(Color.BLACK)
 
 
+        // ToDo: decide if we want to use prior response over learning sessions
+        // model.loadResponses()
+
+
         // closes the view after X time; needs to be called after the model
-        val finishTime = 10L*60 // in seconds ; should be 10 min
+        val finishTime = 10L // in seconds ; should be 10 min
         val handler = Handler()
         handler.postDelayed(Runnable {
             println("Stop Study Activity")
@@ -81,9 +85,9 @@ class StudyActivity : AppCompatActivity() {
 
 
         button.setOnClickListener {
+            println("responses for after click:"+ model.spacingModel2.responses)
+
             println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Click!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            // load in responses, cannot be done earlier, otherwise the program crashes
-            model.loadResponses()
             // read in response to csv; just for savefy, if the user exists the studying too early
             model.writeToCsvFile(model.spacingModel2.responses)
 

@@ -59,6 +59,7 @@ class SpacingModel2 {
             }
         }
         responses.add(newResponse)
+        println("registered new response:"+responses)
     }
 
     // addad that the prior fact is taken into consideration, so that it is not called again.
