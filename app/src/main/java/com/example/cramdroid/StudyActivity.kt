@@ -1,5 +1,9 @@
 package com.example.cramdroid
 
+import android.app.AlarmManager
+import android.app.Notification
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -13,10 +17,6 @@ import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import classes.Fact
-import classes.Response
-import classes.TrialInformation
-import classes.Word
 import viewmodels.WordViewModel
 import viewmodels.WordViewModel2
 import androidx.core.os.HandlerCompat.postDelayed
@@ -25,10 +25,14 @@ import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.os.Handler
+import androidx.core.app.NotificationCompat
+import classes.*
+import models.SchedullingModel
 import models.WorkWithCSV2
 
 
 class StudyActivity : AppCompatActivity() {
+    val NOTIFICATION_CHANNEL_ID = "10001"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +74,7 @@ class StudyActivity : AppCompatActivity() {
         val handler = Handler()
         handler.postDelayed(Runnable {
             println("Stop Study Activity")
+            scheduleNotification(getNotification("This would be a perfect time to study!"))
             // save to csv
             model.writeToCsvFile(model.spacingModel2.responses)
             // write email
@@ -205,6 +210,69 @@ class StudyActivity : AppCompatActivity() {
 
 
     }
+
+    private fun scheduleNotification(notification: Notification) {
+        // decide here between different schedule methods
+        var SchedullingModel = SchedullingModel()
+        SchedullingModel.updateLastTest()
+
+        // schedule just for TESTING
+//         var delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
+
+        // schdedule for PERCENTILE Spacing
+//        var delay = SchedullingModel.getNextMessageInXHours_percentileSpacing()
+
+        // schedule for CONSTANT spacing
+        var delay = SchedullingModel.nextMessageInXHours_constantSpacing(this.applicationContext)
+
+        println("Next schedule in (hours):$delay")
+
+        delay *= 60 * 60 * 1000 // delay in milliseconds
+
+        // Just for testing, delete row later
+        delay = 1000
+
+        //only do something if there is not a negative delay
+        if (delay >= 0) {
+
+            val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
+            notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
+            notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+
+            val futureInMillis = SystemClock.elapsedRealtime() + delay // delay in milliseconds
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            println("Scheduling...")
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
+        }
+        SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
+    }
+
+    private fun getNotification(content: String): Notification {
+
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
+
+        val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        builder.setContentTitle("Studytime!")
+        builder.setContentText(content)
+        builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
+        builder.setLights(Color.MAGENTA, 1000, 200)
+        builder.setAutoCancel(true)
+        builder.setContentIntent(pendingIntent)
+        builder.setChannelId(NOTIFICATION_CHANNEL_ID)
+        println("built")
+        return builder.build()
+    }
+
     fun sendOutputViaEmail() {
         // taken from https://www.youtube.com/watch?v=tZ2YEw6SoBU
         val recipientList = "fbfelix@web.de,e.n.meijer@student.rug.nl,S.Steffen.2@student.rug.nl" //add here your email address, with "," between them

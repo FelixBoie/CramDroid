@@ -55,6 +55,9 @@ class MainActivity : AppCompatActivity() {
 
         delay *= 60 * 60 * 1000 // delay in milliseconds
 
+        // Just for testing, delete row later
+        delay = 1000
+
         //only do something if there is not a negative delay
         if (delay >= 0) {
 
