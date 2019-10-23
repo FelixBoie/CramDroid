@@ -1,6 +1,6 @@
 package classes
 
-class Encounter2(_activation: Float, _reaction_time: Float, _time: Float,_decay:Float) {
+class Encounter2(_activation: Float, _time: Long,_reaction_time: Float, _decay:Float) {
     //Encounter = namedtuple("Encounter", "activation, time, reaction_time, decay")
     var activation = _activation
     var time = _time

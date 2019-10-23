@@ -1,8 +1,6 @@
 package viewmodels
 
-import android.app.Activity
 import android.app.Application
-import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import classes.Encounter
 import classes.Word

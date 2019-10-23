@@ -1,11 +1,6 @@
 package models
 
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.os.Build.ID
-import android.os.SystemClock
 import classes.*
-import java.security.spec.RSAKeyGenParameterSpec.F0
-import java.time.temporal.TemporalAdjusters.next
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
@@ -14,8 +9,8 @@ class SpacingModel2 {
 
 
     // Model constants
-    val LOOKAHEAD_TIME = 15000
-    val FORGET_THRESHOLD = -0.8F
+    val LOOKAHEAD_TIME = 15000L
+    val FORGET_THRESHOLD = -0.8F // ??? changed to see an effect
     val DEFAULT_ALPHA = 0.3F
     val C = 0.25F
     val F = 1.0F
@@ -34,11 +29,15 @@ class SpacingModel2 {
         if (facts.size > 0) {
             for (fact in facts) {
                 if (fact.question == newFact.question) {
-                    println("There is already a fact with the same question String")
                 }
             }
         }
         facts.add(newFact)
+    }
+
+    // added to fast add facts
+    fun addAllFacts(facts:ArrayList<Fact>){
+        this.facts = facts
     }
 
     fun register_response(newResponse: Response) {
@@ -54,7 +53,7 @@ class SpacingModel2 {
     }
 
     // stuck
-    fun get_next_fact(current_time:Float):Pair<Fact,Boolean> {
+    fun get_next_fact(current_time:Long):Pair<Fact,Boolean> {
         /*
         Returns a tuple containing the fact that needs to be repeated most urgently and a boolean indicating whether this fact is new (True) or has been presented before (False).
         If none of the previously studied facts needs to be repeated right now, return a new fact instead.
@@ -64,13 +63,13 @@ class SpacingModel2 {
 
         var fact_activations = ArrayList<Pair<Fact,Float>>()
         for(f in facts){
-            fact_activations.add(Pair(f,calculate_activation(current_time,f)))
+            fact_activations.add(Pair(f,calculate_activation(current_time+LOOKAHEAD_TIME,f)))
         }
 
         var seen_facts = ArrayList<Pair<Fact,Float>>()
         var not_seen_facts = ArrayList<Pair<Fact,Float>>()
         for (a in fact_activations){
-            if(a.second >= Float.NEGATIVE_INFINITY){
+            if(a.second > Float.NEGATIVE_INFINITY){
                 // item has been seen
                 seen_facts.add(a)
             } else {
@@ -81,7 +80,7 @@ class SpacingModel2 {
 
         // Prevent an immediate repetition of the same fact
         if (seen_facts.size > 2) {
-            var last_response = responses[-1]
+            var last_response = responses.get(responses.size-1)
             // remove the last response from seen_facts
 
             for(fact in seen_facts){
@@ -153,12 +152,7 @@ class SpacingModel2 {
 
 
 
-
-
-
-
-
-    fun calculate_activation(time:Float, fact:Fact):Float{
+    fun calculate_activation(time:Long, fact:Fact):Float{
         /*
                 Calculate the activation of a fact at the given time.
          */
@@ -166,6 +160,7 @@ class SpacingModel2 {
 
         var responses_for_fact = ArrayList<Response>()
 
+        //only use responses before the current time
         for (r in responses){
             if(r.fact.question == fact.question){
                 if(r.startTime < time){
@@ -239,29 +234,41 @@ class SpacingModel2 {
             a0_diff = a0 - a_fit
             a1_diff = a1 - a_fit
 
+            // used to avoid exeptions in the loop
+            val tmp= encounters.size - 5
+            val copEncounters = encounters
             for (e in encounters) {
                 d_a0.add(e) // add encounter
                 d_a0[d_a0.size - 1].decay = e.decay + a0_diff // change the decay value
-                // TODO: not sure here, if -1 or not
+
+
+
+
 
                 d_a1.add(e)// add encounter
                 d_a1[d_a1.size - 1].decay = e.decay + a1_diff // change the decay value
 
 
+
+
                 // Calculate the reaction times from activation and compare against observed RTs
-                val start = maxOf(1, (encounters.size - 5))
-                var encounter_window = encounters
+                val start = maxOf(1, tmp)
+                var encounter_window = ArrayList<Encounter2>()
 
                 // remove the first encounters start-1
-                for (a in 0..start - 1) {
-                    encounter_window.removeAt(0)
+                for (a in 0..encounter_window.size-1) {
+                    encounter_window.add(encounters[a])
                 }
+
+
 
                 // now back on track with python file
                 val total_a0_error =
                     calculate_predicted_reaction_time_error(encounter_window, d_a0, reading_time)
                 val total_a1_error =
                     calculate_predicted_reaction_time_error(encounter_window, d_a1, reading_time)
+
+
 
                 // Adjust the search area based on the lowest total error
                 var ac = (a0 + a1) / 2
@@ -270,6 +277,7 @@ class SpacingModel2 {
                 } else {
                     a0 = ac
                 }
+
             }
         }
         return ((a0 + a1) / 2)
@@ -278,7 +286,7 @@ class SpacingModel2 {
 
     fun calculate_activation_from_encounters(
         encounters: ArrayList<Encounter2>,
-        current_time: Float
+        current_time: Long
     ): Float {
         var include_encounters = ArrayList<Encounter2>()
 
@@ -295,7 +303,7 @@ class SpacingModel2 {
         var activation = 0F
         for (e in include_encounters) {
 
-            activation += (((current_time - e.time) / 1000).pow(-e.decay))
+            activation += (((current_time - e.time) / 1000).toFloat().pow(-e.decay))
         }
         return ln(activation)
     }
@@ -364,16 +372,4 @@ class SpacingModel2 {
         val max_rt = get_max_reaction_time_for_fact(response.fact)
         return (minOf(rt, max_rt))
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }

@@ -12,9 +12,11 @@ import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import classes.Response
 import classes.TrialInformation
 import classes.Word
 import viewmodels.WordViewModel
+import viewmodels.WordViewModel2
 
 class StudyActivity : AppCompatActivity() {
 
@@ -23,10 +25,11 @@ class StudyActivity : AppCompatActivity() {
         setContentView(R.layout.activity_study)
 
 
-        val model = ViewModelProviders.of(this).get(WordViewModel::class.java)
-        var currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
-        var actionConfirm = false
-        var item = model.curr_word
+        val model = ViewModelProviders.of(this).get(WordViewModel2::class.java)
+        var startOfTrialTime = SystemClock.elapsedRealtime() // saves the time the the trials starts
+        var currentTime =  SystemClock.elapsedRealtime()
+        var variableSelectingLayout = 1 // can be 0= show trial, 1 = learn trial and 2 feedback trial
+        var item = model.getFact(currentTime)
         val itemText = findViewById<TextView>(R.id.study_item)
         val answer = findViewById<EditText>(R.id.study_answer)
         answer.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -39,96 +42,141 @@ class StudyActivity : AppCompatActivity() {
         })*/
 
         //set current word to random word from word set
-        model.curr_word = model.getRandomWord()
-        item = model.curr_word
-        itemText.text = item.english
+        itemText.text = item.first.question
         answer.setText("")
         feedback.visibility = View.VISIBLE
-        feedback.text = item.dutch
+        feedback.text = item.first.answer
         feedback.setTextColor(Color.BLUE)
         correction.visibility = View.INVISIBLE
         itemText.setTextColor(Color.BLUE)
         //model.updateWordList()
         answer.isEnabled = false
         button.text = "Next"
+        itemText.setTextColor(Color.BLACK)
+
+
 
         button.setOnClickListener {
             println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Click!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            itemText.setTextColor(Color.BLACK)
-
-            // every time the button is pressed, add the information to the csv file
-            // ??? needs to be added again?????
-            //model.writeToCsvFile()
 
 
-            //currentTime =  SystemClock.elapsedRealtime()// TODO: fix spacing
-            //println("!!!!!!!!!!!!!!!!!!!!!!!!!    " + currentTime)
-            if (actionConfirm) {        //WHEN USER HAS TO TRANSLATE THE WORD
-                model.updateSeenWords(item, currentTime)
-                if (item.dutch == answer.text.toString().toLowerCase()){
+            if (variableSelectingLayout==0){
+                // show a test session
+                // when the user sees question and answer
+
+                //Set up the right layout
+                // set question (blue or black)
+                itemText.text = item.first.question
+                itemText.setTextColor(Color.BLUE)
+
+                // set feedback (Correct or False)
+                feedback.visibility = View.INVISIBLE
+                feedback.text = ""
+                feedback.setTextColor(Color.BLUE)
+
+                // set correction: the correct answer
+                correction.visibility = View.VISIBLE
+                correction.text = item.first.answer
+                correction.setTextColor(Color.BLUE)
+
+                // set answer
+                answer.setText("")
+                answer.isEnabled = false
+                answer.setTextColor(Color.BLACK)
+
+                //set button
+                button.text = "Next"
+
+                variableSelectingLayout = 1 // to to learning session
+
+            } else if(variableSelectingLayout==1) {
+                // show a learning session
+
+                // save when a word is presented
+                startOfTrialTime = SystemClock.elapsedRealtime()
+
+                //Set up the right layout
+                // set question (blue or black)
+                itemText.text = item.first.question
+                itemText.setTextColor(Color.BLACK)
+
+                // set feedback (Correct or False)
+                feedback.visibility = View.INVISIBLE
+                feedback.text = ""
+                feedback.setTextColor(Color.BLACK)
+
+                // set correction, so correct answer
+                correction.visibility = View.INVISIBLE
+                correction.text = item.first.answer
+                correction.setTextColor(Color.BLUE)
+
+                // set answer
+                answer.setText("")
+                answer.isEnabled = true
+                answer.setTextColor(Color.BLACK)
+
+                //set button
+                button.text = "Submit"
+                variableSelectingLayout = 2 // go to feedback afterwards
+            } else {
+                // show a feedback session
+
+                itemText.text = item.first.question
+                itemText.setTextColor(Color.BLACK)
+
+                // set feedback (Correct or False)
+                feedback.visibility = View.VISIBLE
+                feedback.text = item.first.answer
+                feedback.setTextColor(Color.BLUE)
+
+                // set correction: the correct answer
+                correction.visibility = View.VISIBLE
+                correction.text = item.first.answer
+                correction.setTextColor(Color.BLACK)
+
+
+                // set answer
+                answer.isEnabled = false
+
+                //set button
+                button.text = "Next"
+
+                // updata current time
+                currentTime = SystemClock.elapsedRealtime()
+
+                // if the user was correct
+                if (item.first.answer == answer.text.toString().toLowerCase()){
+                    // set feedback
                     feedback.text = "Correct!"
                     feedback.setTextColor(resources.getColor(R.color.colorCorrect))
+                    // set users answer
                     answer.setTextColor(resources.getColor(R.color.colorCorrect))
-
-                    //add the information of current trial to the model
-                    model.spacingModel.trialInformation.addTrialInformation(item,
-                        (SystemClock.elapsedRealtime()-currentTime).toFloat(), true)
-
-                } else {
+                    model.register_response(item.first, currentTime,(currentTime-startOfTrialTime).toFloat(),true)
+                } else {// if the user was incorrect
                     feedback.text = "False!"
                     feedback.setTextColor(resources.getColor(R.color.colorFalse))
-                    correction.text = item.dutch
-                    correction.visibility = View.VISIBLE
-                    //answer.setText(item.dutch)
+                    // set users answer
                     answer.setTextColor(resources.getColor(R.color.colorFalse))
-                    //add the information of current trial to the model
-                    model.spacingModel.trialInformation.addTrialInformation(item,(SystemClock.elapsedRealtime()-currentTime).toFloat(), false )
+                    model.register_response(item.first,currentTime, (currentTime-startOfTrialTime).toFloat(),false)
+
                 }
-                button.text = "Next"
-                feedback.visibility = View.VISIBLE
-                answer.isEnabled = false
-                actionConfirm = false
-                //ask the model for new word
-                model.askForNewWord()
-            } else {
-//                println("1. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
-//                for (e in model.curr_word.encounters){
-//                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
-//                }
-                //Update the current time
-                currentTime = SystemClock.elapsedRealtime()
-                //model.curr_word = model.updateWord()
-                item = model.curr_word
-                itemText.text = item.english
-                answer.setText("")
-                correction.visibility = View.INVISIBLE
-                if (item.prev_seen){
-                    actionConfirm = true
-                    answer.isEnabled = true
-                    answer.setTextColor(Color.BLACK)
-                    button.text = "Submit"
-                    feedback.visibility = View.INVISIBLE
-                } else {                //ITEM WAS NOT SEEN BEFORE
-                    feedback.visibility = View.VISIBLE
-                    feedback.text = item.dutch
-                    feedback.setTextColor(Color.BLUE)
-                    itemText.setTextColor(Color.BLUE)
-                    model.spacingModel.trialInformation.addTrialInformation(item,(SystemClock.elapsedRealtime()-currentTime).toFloat(), false )
-                    model.updateSeenWords(item, currentTime)
-                    //model.updateWordList()
-                    answer.isEnabled = false
-                    button.text = "Next"
+
+                // get a new item
+                item = model.getFact(currentTime)
+                println("new item"+item)
+                // if the item is new, show a test, otherwise run learning session
+                if (item.second){
+                    //item is new
+                    variableSelectingLayout = 0
+                } else {
+                    variableSelectingLayout = 1
                 }
-//                println("2. " + model.curr_word.english +"  " + model.curr_word.activation + "  " + model.curr_word.encounters)
-//                for (e in model.curr_word.encounters){
-//                    println("encounters: " + e.activation + "  " + e.reaction_time + "   " +  + e.decay)
-//                }
-                currentTime = SystemClock.elapsedRealtime()
             }
-
-
         }
+
+
     }
+
 }
 
 
