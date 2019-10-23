@@ -76,11 +76,11 @@ class StudyActivity : AppCompatActivity() {
         val handler = Handler()
         handler.postDelayed(Runnable {
             println("Stop Study Activity")
-            scheduleNotification(getNotification("This would be a perfect time to study!"))
+            val delay = scheduleNotification(getNotification("This would be a perfect time to study!"))
             // save to csv
             model.writeToCsvFile(model.spacingModel2.responses)
             // write email
-            sendOutputViaEmail()
+            sendOutputViaEmail(delay)
 
             //set next schedule
             //ToDo: here the code for schedulling needs to be added
@@ -224,7 +224,7 @@ class StudyActivity : AppCompatActivity() {
         inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    private fun scheduleNotification(notification: Notification) {
+    private fun scheduleNotification(notification: Notification):Int {
         // decide here between different schedule methods
         var SchedullingModel = SchedullingModel()
         SchedullingModel.updateLastTest()
@@ -265,6 +265,8 @@ class StudyActivity : AppCompatActivity() {
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
         }
         SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
+
+        return delay
     }
 
     private fun getNotification(content: String): Notification {
@@ -286,7 +288,7 @@ class StudyActivity : AppCompatActivity() {
         return builder.build()
     }
 
-    fun sendOutputViaEmail() {
+    fun sendOutputViaEmail(decay:Int) {
         // taken from https://www.youtube.com/watch?v=tZ2YEw6SoBU
         val recipientList = "fbfelix@web.de,e.n.meijer@student.rug.nl,S.Steffen.2@student.rug.nl" //add here your email address, with "," between them
         val recipients = recipientList.split(",".toRegex()).dropLastWhile { it.isEmpty() }
@@ -296,7 +298,7 @@ class StudyActivity : AppCompatActivity() {
 
         var test = WorkWithCSV2()
 
-        val message = test.getCSVResponsesAsString(this.applicationContext) // reads in the output from the trial
+        val message = test.getCSVResponsesAsString(this.applicationContext)+",currentTime:"+SystemClock.elapsedRealtime()+ ",decay:"+decay // reads in the output from the trial
 
         println("could read in the message")
         println(message)
