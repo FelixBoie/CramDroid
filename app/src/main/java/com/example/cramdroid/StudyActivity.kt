@@ -26,6 +26,7 @@ class StudyActivity : AppCompatActivity() {
 
 
         val model = ViewModelProviders.of(this).get(WordViewModel2::class.java)
+
         var startOfTrialTime = SystemClock.elapsedRealtime() // saves the time the the trials starts
         var currentTime =  SystemClock.elapsedRealtime()
         var variableSelectingLayout = 1 // can be 0= show trial, 1 = learn trial and 2 feedback trial
@@ -58,6 +59,8 @@ class StudyActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Click!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            // read in response to csv
+            // model.writeToCsvFile(model.spacingModel2.responses)
 
 
             if (variableSelectingLayout==0){

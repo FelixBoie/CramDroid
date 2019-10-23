@@ -14,6 +14,7 @@ import classes.StudyNotificationPublisher
 import classes.Word
 import models.SchedullingModel
 import models.WorkWithCSV
+import models.WorkWithCSV2
 
 
 class MainActivity : AppCompatActivity() {
@@ -98,16 +99,18 @@ class MainActivity : AppCompatActivity() {
     // Save the important information for later analysis
     fun sendOutputViaEmail(view: View) {
         // taken from https://www.youtube.com/watch?v=tZ2YEw6SoBU
-        val recipientList = "fbfelix@web.de" //
+        val recipientList = "fbfelix@web.de" //add here your email address, with "," between them
         val recipients = recipientList.split(",".toRegex()).dropLastWhile { it.isEmpty() }
             .toTypedArray() // email addresses to sent to
 
         val subject = "UserModel_data"
 
-        var test = WorkWithCSV()
+        var test = WorkWithCSV2()
 
-        val message = test.general_readCsv2_asString(this.applicationContext) // reads in the output from the trial
+        val message = test.getCSVResponsesAsString(this.applicationContext) // reads in the output from the trial
 
+        println("could read in the message")
+        println(message)
         val intent = Intent(Intent.ACTION_SEND)
         intent.putExtra(Intent.EXTRA_EMAIL, recipients)
         intent.putExtra(Intent.EXTRA_SUBJECT, subject)

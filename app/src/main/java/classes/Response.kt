@@ -8,4 +8,8 @@ class Response (fact:Fact,_time:Long, _reactionTime:Float,_correct:Boolean){
     val startTime = _time // time set to time of creation
     val reactionTime = _reactionTime
     val correct = _correct
+
+    fun responseToString():String{
+        return fact.question + "," + fact.answer  + "," + startTime + "," + reactionTime + "," + correct
+    }
 }

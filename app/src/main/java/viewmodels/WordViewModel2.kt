@@ -1,6 +1,7 @@
 package viewmodels
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import classes.Encounter
 import classes.Fact
@@ -13,8 +14,9 @@ import kotlin.random.Random
 
 class WordViewModel2 (application: Application) : AndroidViewModel(application) {
     val spacingModel2 = SpacingModel2()
+    var WorkWithCSV = WorkWithCSV2()
     init {
-        loadWords() // updates the words
+        loadFacts() // updates the words
     }
 
 
@@ -23,15 +25,18 @@ class WordViewModel2 (application: Application) : AndroidViewModel(application) 
         return words
     }*/
 
-    private fun loadWords() {
-        var test = WorkWithCSV2()
-        // check if a file in was already created, if yes load that, otherwise use the csv from res
-        spacingModel2.addAllFacts(test.initializeFacts_readInCsv(getApplication<Application>().applicationContext))
+    private fun loadFacts() {
+        // facts are working, responses can only be added later
+        spacingModel2.addAllFacts(WorkWithCSV.readInFacts(getApplication<Application>().applicationContext))
+    }
+    fun loadResponses(){
+        spacingModel2.addAllResponses(WorkWithCSV.readInPriorResponses(getApplication<Application>().applicationContext))
     }
 
-    fun writeToCsvFile(){
-//        System.out.println("Hurra, wrote to csv file!!!!!!!!!!!!!!!!!!!!!!!")
+    fun writeToCsvFile(responses:ArrayList<Response>){
+        System.out.println("Hurra, wrote to csv file!!!!!!!!!!!!!!!!!!!!!!!")
         var test = WorkWithCSV2()
+        test.writeCSV(getApplication<Application>().applicationContext, responses)
     }
 
     private fun onCorrect(){

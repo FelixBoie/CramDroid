@@ -39,6 +39,14 @@ class SpacingModel2 {
     fun addAllFacts(facts:ArrayList<Fact>){
         this.facts = facts
     }
+    // add prior responses
+    fun addAllResponses(responses:ArrayList<Response>){
+        // check if there was no csv file
+        println("check if responses are null")
+        if(responses!=null){
+            this.responses = responses
+        }
+    }
 
     fun register_response(newResponse: Response) {
         // prevent dublicate responses
