@@ -38,7 +38,7 @@
         android:text="@string/settings"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_learning" />
+        app:layout_constraintTop_toBottomOf="@+id/start_tutorial" />
 
     <Button
         android:id="@+id/sent_Email"
@@ -51,4 +51,15 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/open_settings" />
+
+    <Button
+        android:id="@+id/start_tutorial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:onClick="openTutorial"
+        android:text="@string/start_tutorial"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/start_learning" />
 </androidx.constraintlayout.widget.ConstraintLayout>

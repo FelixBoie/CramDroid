@@ -34,6 +34,11 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun openTutorial(view: View) {
+        val intent = Intent(this, TutorialActivity::class.java)
+        startActivity(intent)
+    }
+
     fun settingsPress(view: View) {
         scheduleNotification(getNotification("This would be a perfect time to study!"))
     }
