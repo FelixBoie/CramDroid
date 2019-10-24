@@ -94,8 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:backgroundTint="#CDE7E2"
-            android:text="Button"
-            android:textColor="@android:color/black"
+            android:text="@string/tut_cont"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tut_info" />
