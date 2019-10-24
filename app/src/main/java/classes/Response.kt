@@ -10,6 +10,6 @@ class Response (fact:Fact,_time:Long, _reactionTime:Float,_correct:Boolean){
     val correct = _correct
 
     fun responseToString():String{
-        return fact.question + "," + fact.answer  + "," + startTime + "," + reactionTime + "," + correct
+        return fact.question + "," + fact.answer  + "," + startTime + "," + reactionTime + "," + correct + ","
     }
 }

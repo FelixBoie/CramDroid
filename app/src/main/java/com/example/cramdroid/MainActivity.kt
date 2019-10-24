@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         var test = WorkWithCSV2()
 
-        val message = test.getCSVResponsesAsString(this.applicationContext) // reads in the output from the trial
+        val message = test.getCSVResponsesAsString(this.applicationContext)+test.getCurrentTimeAndSuggestedTime(this.applicationContext) // reads in the output from the trial
 
         println("could read in the message")
         println(message)

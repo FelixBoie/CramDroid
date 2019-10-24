@@ -159,6 +159,8 @@ public class WorkWithCSV2 {
                 while ((oneLine = br.readLine()) != null) {
                     priorTimes += oneLine;
                 }
+                return priorTimes;
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

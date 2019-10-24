@@ -302,7 +302,7 @@ class StudyActivity : AppCompatActivity() {
 
         var test = WorkWithCSV2()
 
-        val message = test.getCSVResponsesAsString(this.applicationContext)+test.getCurrentTimeAndSuggestedTime(this.applicationContext)// reads in the output from the trial ToDo: needs also the suggested times and current times
+        val message = test.getCSVResponsesAsString(this.applicationContext)+";;;"+test.getCurrentTimeAndSuggestedTime(this.applicationContext)// reads in the output from the trial ToDo: needs also the suggested times and current times
 
         println("could read in the message")
         println(message)
