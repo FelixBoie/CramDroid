@@ -40,68 +40,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun settingsPress(view: View) {
-        scheduleNotification(getNotification("This would be a perfect time to study!"))
-    }
-    private fun scheduleNotification(notification: Notification) {
-        // decide here between different schedule methods
-        var SchedullingModel = SchedullingModel()
-        SchedullingModel.updateLastTest()
-
-        // schedule just for TESTING
-//         var delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
-
-        // schdedule for PERCENTILE Spacing
-//        var delay = SchedullingModel.getNextMessageInXHours_percentileSpacing()
-
-        // schedule for CONSTANT spacing
-        var delay = SchedullingModel.nextMessageInXHours_constantSpacing(this.applicationContext)
-
-        println("Next schedule in (hours):$delay")
-
-        delay *= 60 * 60 * 1000 // delay in milliseconds
-
-        // Just for testing, delete row later
-        delay = 1000
-
-        //only do something if there is not a negative delay
-        if (delay >= 0) {
-
-            val notificationIntent = Intent(this, StudyNotificationPublisher::class.java)
-            notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION_ID, 1)
-            notificationIntent.putExtra(StudyNotificationPublisher.NOTIFICATION, notification)
-            val pendingIntent = PendingIntent.getBroadcast(
-                this,
-                0,
-                notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-
-
-            val futureInMillis = SystemClock.elapsedRealtime() + delay // delay in milliseconds
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            println("Scheduling...")
-            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
-        }
-        SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
-    }
-
-    private fun getNotification(content: String): Notification {
-
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
-
-        val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        builder.setContentTitle("Studytime!")
-        builder.setContentText(content)
-        builder.setSmallIcon(ic_dialog_alert)
-        builder.setLights(Color.MAGENTA, 1000, 200)
-        builder.setAutoCancel(true)
-        builder.setContentIntent(pendingIntent)
-        builder.setChannelId(NOTIFICATION_CHANNEL_ID)
-        println("built")
-        return builder.build()
+        println("next schession is only schedulled after a learning session was completed")
+        //ToDo:Remove this button
     }
 
     // Save the important information for later analysis
