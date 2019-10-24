@@ -164,6 +164,10 @@ public class SchedullingModel {
 
     // adjust the time, to not sent notification outside the selected ours
     private int adjustSentMessageInXHours(int suggestedHours_bySpacingModel) {
+        // if time in past
+        if (suggestedHours_bySpacingModel<=0){
+            return -1;
+        }
         // check if time is blocked
         int suggestedTime_hours = (lastStudied.hour + suggestedHours_bySpacingModel )% 24;
         if(suggestedTime_hours < blockedTimeStop) {

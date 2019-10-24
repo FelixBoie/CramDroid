@@ -126,4 +126,46 @@ public class WorkWithCSV2 {
             e.printStackTrace();
         }
     }
+
+    public void saveCurrentTimeAndSuggestedTime(Context context, Long currentTime, int delay){
+        Log.d("Files", "Path: " + context.getFilesDir());
+
+        //data saved Facts
+        String data = getCurrentTimeAndSuggestedTime(context)+ "," +currentTime.toString() + "," + delay + "," + "\n";
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("saveTimes.csv", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+
+        } catch (IOException e){
+            Log.wtf("My acitivity", "Error writing datafile" , e);
+            e.printStackTrace();
+        }
+    }
+    public String getCurrentTimeAndSuggestedTime(Context context){
+        File file = new File(context.getFilesDir(),"saveTimes.csv");
+
+        // if the csv file already exist then open it
+        if(file.exists()) {
+            FileInputStream fis = null;
+            String priorTimes = "";
+
+            try {
+                fis = context.openFileInput("saveTimes.csv");
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader br = new BufferedReader(isr);
+                String oneLine;
+
+                while ((oneLine = br.readLine()) != null) {
+                    priorTimes += oneLine;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Currently no csv file for times");
+            return "";
+        }
+        return "";
+    }
 }
