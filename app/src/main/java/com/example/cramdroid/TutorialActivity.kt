@@ -61,9 +61,8 @@ class TutorialActivity : AppCompatActivity() {
                         "the button right to it. Go on and click the 'Next'-Button now!"
             } else if (tut_state==6){
                 cont.text = "Finish"
-                info.text="Phew, that was quite a session! Now, last but not least, to know when your next session is due, " +
-                        "a timed notification will appear on your android device. Whenever this appears, " +
-                        "you know that it's time to study again and you can open the app by simply clicking on it! " +
+                info.text="Phew, that was quite a session! To know when your next session is due, " +
+                        "a timed notification will appear on your android device. Whenever this appears you can open the app by simply clicking on it! " +
                         "To finish the tutorial and show an example notification, just press 'Finish' below!"
                 tut_state+=1
             } else if (tut_state==7) {
@@ -120,8 +119,8 @@ class TutorialActivity : AppCompatActivity() {
                 feedback.visibility = View.INVISIBLE
                 button.text="Submit"
                 tut_state+=1
-                info.text = "Again, you are being asked to provide the translation to the previously " +
-                        "introduced word. However, this time we want to see what will happen if you " +
+                info.text = "Again, provide the translation to the previously " +
+                        "introduced word. However, this time lets see what happens if you " +
                         "type in the wrong translation. So, just type in any bogus answer that comes " +
                         "to your mind and press 'Submit'! Don't worry, we won't tell anyone if it's dirty! :)"
             } else if (tut_state==5){
@@ -141,8 +140,8 @@ class TutorialActivity : AppCompatActivity() {
                     tut_state+=1
                     cont.isEnabled = true
                     info.text = "Well done, you're wrong! If you make a mistake, CramDroid lets you " +
-                            "know by showing you a big fat 'False!' and marking your provided answer red. " +
-                            "It also shows you what would have been the correct answer. Press the button " +
+                            "know by showing you a big fat 'False!' and marking your answer red. " +
+                            "It also shows you the correct answer. Press the button " +
                             "below to continue."
                 }
             }
