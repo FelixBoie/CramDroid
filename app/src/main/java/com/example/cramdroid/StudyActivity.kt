@@ -68,7 +68,7 @@ class StudyActivity : AppCompatActivity() {
 
 
         // ToDo: decide if we want to use prior response over learning sessions
-        // model.loadResponses()
+        model.loadResponses()
 
 
         // closes the view after X time; needs to be called after the model
@@ -80,12 +80,16 @@ class StudyActivity : AppCompatActivity() {
 
             //set next schedule
             val delay = scheduleNotification(getNotification("This would be a perfect time to study!"))
-            // save to csv
+            println("delay "+ delay)
+
+            // save to csv times
+            model.WorkWithCSV.saveCurrentTimeAndSuggestedTime(this.applicationContext,SystemClock.elapsedRealtime(),delay)
+            // save to csv responses
             model.writeToCsvFile(model.spacingModel2.responses)
-            // write email
-            sendOutputViaEmail(delay)
-
-
+            // write email, only if there are not more testing sessions
+            if(delay<=0){
+                sendOutputViaEmail(delay)
+            }
 
             this.finish() }, finishTime * 1000)
 
@@ -244,8 +248,8 @@ class StudyActivity : AppCompatActivity() {
 
         delay *= 60 * 60 * 1000 // delay in milliseconds
 
-        // Just for testing, delete row later
-        delay = 1000
+//        // Just for testing, delete row later
+//        delay = 1000
 
         //only do something if there is not a negative delay
         if (delay >= 0) {
@@ -298,7 +302,7 @@ class StudyActivity : AppCompatActivity() {
 
         var test = WorkWithCSV2()
 
-        val message = test.getCSVResponsesAsString(this.applicationContext)+",currentTime:"+SystemClock.elapsedRealtime()+ ",decay:"+decay // reads in the output from the trial
+        val message = test.getCSVResponsesAsString(this.applicationContext)+test.getCurrentTimeAndSuggestedTime(this.applicationContext)// reads in the output from the trial ToDo: needs also the suggested times and current times
 
         println("could read in the message")
         println(message)
