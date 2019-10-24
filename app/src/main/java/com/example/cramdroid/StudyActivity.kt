@@ -72,20 +72,22 @@ class StudyActivity : AppCompatActivity() {
 
 
         // closes the view after X time; needs to be called after the model
-        val finishTime = 2L*60 // in seconds ; should be 10 min
+        val finishTime = 3L // in seconds //TIME FOR A SESSION
         val handler = Handler()
         handler.postDelayed(Runnable {
+            // A study activation was successfully finished
             println("Stop Study Activity")
+
+            //set next schedule
             val delay = scheduleNotification(getNotification("This would be a perfect time to study!"))
             // save to csv
             model.writeToCsvFile(model.spacingModel2.responses)
             // write email
             sendOutputViaEmail(delay)
 
-            //set next schedule
-            //ToDo: here the code for schedulling needs to be added
 
-            this.finish() }, finishTime * 60 * 1000)
+
+            this.finish() }, finishTime * 1000)
 
 
 
@@ -231,23 +233,19 @@ class StudyActivity : AppCompatActivity() {
     private fun scheduleNotification(notification: Notification):Int {
         // decide here between different schedule methods
         var SchedullingModel = SchedullingModel()
-        SchedullingModel.updateLastTest()
 
-        // schedule just for TESTING
-//         var delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
+        // one learning session is finished, so retract that one
+        SchedullingModel.getNumberOfTestsLeft(this.applicationContext)
+        SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
 
-        // schdedule for PERCENTILE Spacing
-//        var delay = SchedullingModel.getNextMessageInXHours_percentileSpacing()
-
-        // schedule for CONSTANT spacing
-        var delay = SchedullingModel.nextMessageInXHours_constantSpacing(this.applicationContext)
+        var delay = SchedullingModel.getSchedullingInHours(this.applicationContext)
 
         println("Next schedule in (hours):$delay")
 
         delay *= 60 * 60 * 1000 // delay in milliseconds
 
         // Just for testing, delete row later
-        delay = 100000
+        delay = 1000
 
         //only do something if there is not a negative delay
         if (delay >= 0) {
@@ -268,8 +266,6 @@ class StudyActivity : AppCompatActivity() {
             println("Scheduling...")
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
         }
-        SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
-
         return delay
     }
 
@@ -315,11 +311,6 @@ class StudyActivity : AppCompatActivity() {
 
         startActivity(Intent.createChooser(intent, "Choose an email client"))
     }
-    // chedule notification
-
-
-
-
 }
 
 

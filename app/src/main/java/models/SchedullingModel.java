@@ -13,6 +13,9 @@ import classes.timePoint;
 
 public class SchedullingModel {
 
+    private boolean usePercentileSpacing = true; // if false use constant spacing, if true use percentile spacing
+
+
     private timePoint lastStudied  = new timePoint(2000,1,1,1,0,0,0); // just initialize
     private timePoint finalTest  = new timePoint(2019,10,28,22, 0,0,0); // day of the final test
 
@@ -26,14 +29,48 @@ public class SchedullingModel {
         updateLastTest();
     }
 
-    private void getNumberOfTestsLeft(Context context){
 
-        generalPref = context.getSharedPreferences("timesLeftToStudy",Context.MODE_PRIVATE);
-        String timesLeftToStudyString = generalPref.getString("timesLeftToStudy","4"); // in first part specify the key
-        this.numberOfTestsLeft = Integer.parseInt(timesLeftToStudyString);
-        System.out.println("getNumberOfTestsLeft: " + numberOfTestsLeft);
+    // SWITCH HERE BETWEEN CONTANT AND PERCENTILE SCHEDULLING
 
+    public int getSchedullingInHours(Context context){
+        getNumberOfTestsLeft(context);
+        updateLastTest();
+
+        // if no more learning sessions left
+        if(numberOfTestsLeft<=0){
+            return -1;
+        } else if(numberOfTestsLeft == 1) {
+            // should only test once/ should test 24 h before the final test,
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                LocalDateTime tmp_lastStudied = LocalDateTime.of(lastStudied.year, Month.of(lastStudied.month), lastStudied.day, lastStudied.hour, 0);
+                LocalDateTime tmP_finalStudy = LocalDateTime.of(finalTest.year, finalTest.month, finalTest.day, finalTest.hour, 0);
+
+                Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
+
+                if (duration.toHours() < 24) {
+                    // then study now
+                    return 0;
+                } else {
+                    // then study 24 hours before final test
+                    return (int) (duration.toHours() - 24);
+                }
+            }
+        }else {
+            // DECIDE HERE BETWEEEN PERCENTIL OR CONSTANT SPACING
+            int hoursTillNextSchedule = 0;
+            if(usePercentileSpacing){
+                hoursTillNextSchedule = getNextMessageInXHours_percentileSpacing();
+            } else {
+                hoursTillNextSchedule = getNextMessageInXHours_byConstantSpacing();
+            }
+            return adjustSentMessageInXHours(hoursTillNextSchedule);
+
+
+        }
+        return -1;
     }
+
+
     public void reduceNumberOfTestsLeft(Context context){
         //reduce the number of Tests left
         SharedPreferences.Editor editor = generalPref.edit();
@@ -43,24 +80,9 @@ public class SchedullingModel {
     }
 
 
-    // testing schedule
-    public int getNextMessageInMS_test() {
-        return 20000;
-    }
-
-    public int getNextMessageInXHours_percentileSpacing(){
-        updateLastTest();
-        return adjustSentMessageInXHours(getNextMessageInXHours_bySpacingModel());
-    }
-
-    public int nextMessageInXHours_constantSpacing(Context context){
-        updateLastTest();
-        getNumberOfTestsLeft(context);
-        return adjustSentMessageInXHours(getNextMessageInXHours_byConstantSpacing());
-    }
 
     // schedule based on PERCENTILE spacing
-    private int getNextMessageInXHours_bySpacingModel() {
+    private int getNextMessageInXHours_percentileSpacing() {
         int nextMessageInXHours = 0;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -112,13 +134,22 @@ public class SchedullingModel {
                 Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
 
                 int difference_hours = (int) (duration.getSeconds() / (60 * 60));
-                nextMessageInXHours = (int) ((difference_hours - 24) / (numberOfTestsLeft - 1)); // numberOfTestLeft ==1 would lead to an error
+                nextMessageInXHours = (int) ((difference_hours - 24) / (numberOfTestsLeft)); // numberOfTestLeft ==1 would lead to an error
             }
         return nextMessageInXHours;
     }
 
+    public void getNumberOfTestsLeft(Context context){
 
-    public void updateLastTest() {
+        generalPref = context.getSharedPreferences("timesLeftToStudy",Context.MODE_PRIVATE);
+        String timesLeftToStudyString = generalPref.getString("timesLeftToStudy","4"); // in first part specify the key
+        this.numberOfTestsLeft = Integer.parseInt(timesLeftToStudyString);
+        System.out.println("getNumberOfTestsLeft: " + numberOfTestsLeft);
+
+    }
+
+
+    private void updateLastTest() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             LocalDate nowDate = LocalDate.now();
             lastStudied.year = (int) nowDate.getYear();
@@ -132,7 +163,7 @@ public class SchedullingModel {
 
 
     // adjust the time, to not sent notification outside the selected ours
-    int adjustSentMessageInXHours(int suggestedHours_bySpacingModel) {
+    private int adjustSentMessageInXHours(int suggestedHours_bySpacingModel) {
         // check if time is blocked
         int suggestedTime_hours = (lastStudied.hour + suggestedHours_bySpacingModel )% 24;
         if(suggestedTime_hours < blockedTimeStop) {
@@ -143,13 +174,5 @@ public class SchedullingModel {
 
         }
         return suggestedHours_bySpacingModel;
-    }
-
-    // set final test time
-    public void setFinalTestTime(int year, int month, int day, int hour){
-        finalTest.year =year;
-        finalTest.month =month;
-        finalTest.day =day;
-        finalTest.hour =hour;
     }
 }
