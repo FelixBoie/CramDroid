@@ -70,11 +70,10 @@ class SpacingModel2 {
          */
 
         // Calculate all fact activations in the near future
-
         var fact_activations = ArrayList<Pair<Fact,Float>>()
         for(f in facts){
             //only consider facts that are not the same as the previous one
-            if (f != previous_fact) {
+            if (f != null) {
                 fact_activations.add(
                     Pair(
                         f,
@@ -83,26 +82,32 @@ class SpacingModel2 {
                 )
             }
         }
-        /*
+
         // check activations
         for(fact_activation in fact_activations){
-            println("fact:" + fact_activation.first.question + "activation:" + fact_activation.second)
+            if(fact_activation.second>Float.NEGATIVE_INFINITY) {
+                println("fact:" + fact_activation.first.question + "activation:" + fact_activation.second + "rateofForgetting: " + get_rate_of_forgetting(current_time.toFloat(),fact_activation.first).toString())
+            }
         }
-
-         */
 
 
         var seen_facts = ArrayList<Pair<Fact,Float>>()
         var not_seen_facts = ArrayList<Pair<Fact,Float>>()
         for (a in fact_activations){
             if(a.second > Float.NEGATIVE_INFINITY){
-                // item has been seen
-                seen_facts.add(a)
-            } else {
+                // item has been seen and was not presented before
+                if (a.first != previous_fact){
+                    seen_facts.add(a)
+
+                }
+            } else if (a.second == Float.NEGATIVE_INFINITY) {
                 // fact has been seen
                 not_seen_facts.add(a)
             }
         }
+
+        /* done differently
+
 
         // Prevent an immediate repetition of the same fact
         if (seen_facts.size > 2) {
@@ -115,6 +120,8 @@ class SpacingModel2 {
                 }
             }
         }
+
+        */
          // Reinforce the weakest fact with an activation below the threshold
         var seen_facts_below_threshold = ArrayList<Pair<Fact,Float>>()
         for (a in seen_facts){
@@ -128,16 +135,20 @@ class SpacingModel2 {
             // get smallest seen_fact
             var weakest_fact = seen_facts[0]
             for (fact in seen_facts){
-                if(fact.second<=fact.second){
+                if(fact.second<=weakest_fact.second){ // made a mistake!!!!!!, now fixed
                     weakest_fact = fact
                 }
             }
 
             //??? problem getting the min amount of a factor
             return Pair(weakest_fact.first, false)
-
         }
         // If none of the previously seen facts has an activation below the threshold, return a new random fact
+        //if there is only one fact left that is not seen
+        if(not_seen_facts.size ==1){
+            return Pair(not_seen_facts[0].first,true)
+        }
+        // if there at least 2 other items left, not seen
         return Pair(not_seen_facts[(Random.nextInt(0, not_seen_facts.size-1))].first, true)
     }
 
@@ -208,8 +219,11 @@ class SpacingModel2 {
                 tmp_encounter.decay = calculate_decay(encounter.activation,alpha)
                 output_encounters.add(tmp_encounter)
 
+
             }
+            println("??????????????????????????????????????????????????/response:"+ response.responseToString())
         }
+
         return(calculate_activation_from_encounters(local_encounters, time))
 
     }
@@ -238,6 +252,10 @@ class SpacingModel2 {
         var estimated_rt = estimate_reaction_time_from_activation(activation, reading_time)
         var est_diff = estimated_rt - normalise_reaction_time(response)
 
+        println("estimated rt "+ estimated_rt)
+        println("your rt"+ normalise_reaction_time(response))
+        println("just the reaction time" + response.reactionTime.toString())
+
         var a0 = 0F
         var a1 = 0F
         var a0_diff = 0F
@@ -246,10 +264,12 @@ class SpacingModel2 {
         var d_a1 = ArrayList<Encounter2>()
 
         if (est_diff < 0) {
+            println("estimated rt was too short => you were to slow")
             // Estimated RT was too short (estimated activation too high), so actual decay was larger
             a0 = a_fit
             a1 = a_fit + 0.05F
         } else {
+            println("estimated rt was too long => you were too fast")
             // Estimated RT was too long (estimated activation too low), so actual decay was smaller
             a0 = a_fit - 0.05F
             a1 = a_fit
@@ -265,9 +285,7 @@ class SpacingModel2 {
             val copEncounters = encounters
             for (e in encounters) {
                 d_a0.add(e) // add encounter
-                d_a0[d_a0.size - 1].decay = e.decay + a0_diff // change the decay value
-
-
+                d_a0[d_a0.size - 1].decay += e.decay + a0_diff // change the decay value
 
 
 
@@ -306,6 +324,7 @@ class SpacingModel2 {
 
             }
         }
+        println("estimated alpha is: " + ((a0 + a1) / 2))
         return ((a0 + a1) / 2)
     }
 
@@ -330,7 +349,9 @@ class SpacingModel2 {
         for (e in include_encounters) {
 
             activation += (((current_time - e.time) / 1000).toFloat().pow(-e.decay))
+            println("show activation of all encounters"+ activation)
         }
+        println("final activation"+ activation)
         return ln(activation)
     }
 
@@ -361,7 +382,7 @@ class SpacingModel2 {
         /*
         Calculate an estimated reaction time given a fact's activation and the expected reading time
          */
-        return((this.F * exp(-activation) + (reading_time / 1000)) * 1000).toFloat()
+        return((this.F * exp(-activation) + (reading_time / 1000)) * 1000).toFloat() // add 500 ms at the end because input takes longer
     }
 
     fun get_max_reaction_time_for_fact(fact:Fact):Float {
@@ -375,6 +396,8 @@ class SpacingModel2 {
 
     fun get_reading_time(text: String): Float{
         var word_count = text.split(" ")
+
+        // problem that user only logged after the time
 
         if (word_count.size > 1) {
             var character_count = text.length
