@@ -13,11 +13,11 @@ import classes.timePoint;
 
 public class SchedullingModel {
 
-    private boolean usePercentileSpacing = true; // if false use constant spacing, if true use percentile spacing
+    private boolean usePercentileSpacing = false; // if false use constant spacing, if true use percentile spacing
 
 
     private timePoint lastStudied  = new timePoint(2000,1,1,1,0,0,0); // just initialize
-    private timePoint finalTest  = new timePoint(2019,10,28,22, 0,0,0); // day of the final test
+    private timePoint finalTest  = new timePoint(2019,11,1,12, 0,0,0); // day of the final test
 
     private int blockedTimeStart  = 20; // the hour of the day
     private int blockedTimeStop = 8;    // the hour of the day
@@ -134,6 +134,7 @@ public class SchedullingModel {
                 Duration duration = Duration.between(tmp_lastStudied, tmP_finalStudy);
 
                 int difference_hours = (int) (duration.getSeconds() / (60 * 60));
+                System.out.println("difference in hours" +difference_hours);
                 nextMessageInXHours = (int) ((difference_hours - 24) / (numberOfTestsLeft)); // numberOfTestLeft ==1 would lead to an error
             }
         return nextMessageInXHours;

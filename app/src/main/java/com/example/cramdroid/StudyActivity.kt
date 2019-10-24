@@ -72,7 +72,7 @@ class StudyActivity : AppCompatActivity() {
 
 
         // closes the view after X time; needs to be called after the model
-        val finishTime = 3L // in seconds //TIME FOR A SESSION
+        val finishTime = 10L*60 // in seconds //TIME FOR A SESSION
         val handler = Handler()
         handler.postDelayed(Runnable {
             // A study activation was successfully finished

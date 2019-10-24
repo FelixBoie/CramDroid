@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     fun settingsPress(view: View) {
         println("next schession is only schedulled after a learning session was completed")
         //ToDo:Remove this button
+
     }
 
     // Save the important information for later analysis
