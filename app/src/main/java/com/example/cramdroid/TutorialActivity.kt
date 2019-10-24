@@ -149,25 +149,7 @@ class TutorialActivity : AppCompatActivity() {
         }
     }
     private fun scheduleNotification(notification: Notification):Int {
-        // decide here between different schedule methods
-        var SchedullingModel = SchedullingModel()
-        SchedullingModel.updateLastTest()
-
-        // schedule just for TESTING
-//         var delay = SchedullingModel.nextMessageInMS_test // ??? needs to be changed, later but this helps with just keeoing it in the loop
-
-        // schdedule for PERCENTILE Spacing
-//        var delay = SchedullingModel.getNextMessageInXHours_percentileSpacing()
-
-        // schedule for CONSTANT spacing
-        var delay = SchedullingModel.nextMessageInXHours_constantSpacing(this.applicationContext)
-
-        println("Next schedule in (hours):$delay")
-
-        delay *= 60 * 60 * 1000 // delay in milliseconds
-
-        // Just for testing, delete row later
-        delay = 10
+        val delay = 10
 
         //only do something if there is not a negative delay
         if (delay >= 0) {
@@ -188,7 +170,6 @@ class TutorialActivity : AppCompatActivity() {
             println("Scheduling...")
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent)
         }
-        SchedullingModel.reduceNumberOfTestsLeft(this.applicationContext)
 
         return delay
     }
