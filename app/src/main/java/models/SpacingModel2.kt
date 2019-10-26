@@ -1,10 +1,12 @@
 package models
 
+import android.os.SystemClock
 import classes.*
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.random.Random
+import kotlin.math.*
 
 class SpacingModel2 {
 
@@ -12,14 +14,14 @@ class SpacingModel2 {
     // Model constants
     val LOOKAHEAD_TIME = 15000L
     val FORGET_THRESHOLD = -0.8F // ??? changed to see an effect
-    val DEFAULT_ALPHA = 0.3F
+    val DEFAULT_ALPHA = 0.5F
     val C = 0.25F
     val F = 1.0F
 
     // initialize
     var facts = ArrayList<Fact>()
     var responses = ArrayList<Response>()
-
+    var currentTime = SystemClock.elapsedRealtime()
 
     // sent message, if fact already exists
     fun add_fact(newFact: Fact) {
@@ -29,11 +31,12 @@ class SpacingModel2 {
         // Ensure that a fact with this ID does not exist already
         if (facts.size > 0) {
             for (fact in facts) {
-                if (fact.question == newFact.question) {
+                if (fact.question != newFact.question) {
+                    facts.add(newFact)
                 }
             }
         }
-        facts.add(newFact)
+
     }
 
     // added to fast add facts
@@ -68,7 +71,7 @@ class SpacingModel2 {
         Returns a tuple containing the fact that needs to be repeated most urgently and a boolean indicating whether this fact is new (True) or has been presented before (False).
         If none of the previously studied facts needs to be repeated right now, return a new fact instead.
          */
-
+        currentTime = current_time
         // Calculate all fact activations in the near future
         var fact_activations = ArrayList<Pair<Fact,Float>>()
         for(f in facts){
@@ -86,7 +89,9 @@ class SpacingModel2 {
         // check activations
         for(fact_activation in fact_activations){
             if(fact_activation.second>Float.NEGATIVE_INFINITY) {
-                println("fact:" + fact_activation.first.question + "activation:" + fact_activation.second + "rateofForgetting: " + get_rate_of_forgetting(current_time.toFloat(),fact_activation.first).toString())
+                //println( "!!!!!!!!!!!")
+               // println("fact: "+ fact_activation.first.question)
+              println("fact: " + fact_activation.first.question + " activation: " + fact_activation.second + " rateofForgetting: " + get_rate_of_forgetting(current_time.toFloat(),fact_activation.first).toString())
             }
         }
 
@@ -125,16 +130,16 @@ class SpacingModel2 {
          // Reinforce the weakest fact with an activation below the threshold
         var seen_facts_below_threshold = ArrayList<Pair<Fact,Float>>()
         for (a in seen_facts){
-            if (a.second < FORGET_THRESHOLD){
+            if (a.second < FORGET_THRESHOLD) {
                 seen_facts_below_threshold.add(a)
             }
-
         }
         if (not_seen_facts.size == 0 || seen_facts_below_threshold.size > 0){
 
             // get smallest seen_fact
             var weakest_fact = seen_facts[0]
             for (fact in seen_facts){
+                println("fact : "+ fact.first.question + " second: " + fact.second)
                 if(fact.second<=weakest_fact.second){ // made a mistake!!!!!!, now fixed
                     weakest_fact = fact
                 }
@@ -161,6 +166,7 @@ class SpacingModel2 {
          */
         var local_encounters = ArrayList<Encounter2>()
         var responses_for_fact = ArrayList<Response>()
+        var output_encounters = ArrayList<Encounter2>() // final output with will be used for the output
 
         for (r in responses){
             if(r.fact.question == fact.question){
@@ -170,20 +176,32 @@ class SpacingModel2 {
             }
         }
         var alpha = DEFAULT_ALPHA
+        var activation = 0.0F
+        //local_encounters = mutableListOf<Encounter2>() as ArrayList<Encounter2>
         // Calculate the activation by running through the sequence of previous responses
-        for (response in responses_for_fact){
-            var activation = calculate_activation_from_encounters(local_encounters, response.startTime)
-            local_encounters.add(Encounter2(activation, response.startTime, normalise_reaction_time(response), DEFAULT_ALPHA))
+        for (response in responses_for_fact) {
+            activation =
+                calculate_activation_from_encounters(local_encounters, response.startTime)
+            local_encounters.add(
+                Encounter2(
+                    activation,
+                    response.startTime,
+                    normalise_reaction_time(response),
+                    DEFAULT_ALPHA
+                )
+            )
             alpha = estimate_alpha(local_encounters, activation, response, alpha)
 
             //Update decay estimates of previous encounters
-            var output_encounters = ArrayList<Encounter2>() // final output with will be used for the output
+
             for (encounter  in local_encounters){
                 var tmp_encounter = encounter
                 tmp_encounter.decay = calculate_decay(encounter.activation,alpha)
+                //println("tmp decay: " + tmp_encounter.decay)
                 output_encounters.add(tmp_encounter)
             }
         }
+
         return (alpha)
     }
 
@@ -194,7 +212,7 @@ class SpacingModel2 {
                 Calculate the activation of a fact at the given time.
          */
         var local_encounters = ArrayList<Encounter2>()
-
+        var output_encounters = ArrayList<Encounter2>() // final output with will be used for the output
         var responses_for_fact = ArrayList<Response>()
 
         //only use responses before the current time
@@ -206,25 +224,27 @@ class SpacingModel2 {
             }
         }
         var alpha = DEFAULT_ALPHA
+
         // Calculate the activation by running through the sequence of previous responses
         for (response in responses_for_fact){
             var activation = calculate_activation_from_encounters(local_encounters, response.startTime)
-            local_encounters.add(Encounter2(activation, response.startTime, normalise_reaction_time(response), DEFAULT_ALPHA))
+            local_encounters.add(Encounter2(activation, response.startTime, normalise_reaction_time(response), alpha))
             alpha = estimate_alpha(local_encounters, activation, response, alpha)
 
             //Update decay estimates of previous encounters
-            var output_encounters = ArrayList<Encounter2>() // final output with will be used for the output
+
             for (encounter  in local_encounters){
                 var tmp_encounter = encounter
                 tmp_encounter.decay = calculate_decay(encounter.activation,alpha)
+
                 output_encounters.add(tmp_encounter)
 
 
             }
-            println("??????????????????????????????????????????????????/response:"+ response.responseToString())
+            //println("??????????????????????????????????????????????????/response:"+ response.responseToString())
         }
 
-        return(calculate_activation_from_encounters(local_encounters, time))
+        return(calculate_activation_from_encounters(output_encounters, time+LOOKAHEAD_TIME))
 
     }
 
@@ -252,79 +272,84 @@ class SpacingModel2 {
         var estimated_rt = estimate_reaction_time_from_activation(activation, reading_time)
         var est_diff = estimated_rt - normalise_reaction_time(response)
 
-        println("estimated rt "+ estimated_rt)
-        println("your rt"+ normalise_reaction_time(response))
-        println("just the reaction time" + response.reactionTime.toString())
+       //println("estimated rt "+ estimated_rt)
+       //println("your rt"+ normalise_reaction_time(response))
+       // println("just the reaction time" + response.reactionTime.toString())
 
         var a0 = 0F
         var a1 = 0F
+        var ac = 0F
         var a0_diff = 0F
         var a1_diff = 0F
         var d_a0 = ArrayList<Encounter2>()
         var d_a1 = ArrayList<Encounter2>()
+        var encounterWindow = ArrayList<Encounter2>()
 
         if (est_diff < 0) {
-            println("estimated rt was too short => you were to slow")
+           // println("estimated rt was too short => you were to slow")
             // Estimated RT was too short (estimated activation too high), so actual decay was larger
             a0 = a_fit
             a1 = a_fit + 0.05F
         } else {
-            println("estimated rt was too long => you were too fast")
+            //println("estimated rt was too long => you were too fast")
             // Estimated RT was too long (estimated activation too low), so actual decay was smaller
             a0 = a_fit - 0.05F
             a1 = a_fit
         }
         // Binary search between previous fit and proposed alpha
-        for (i in 1..6) {
+        for (i in 0..6) {
             // Adjust all decays to use the new alpha
             a0_diff = a0 - a_fit
             a1_diff = a1 - a_fit
 
-            // used to avoid exeptions in the loop
-            val tmp= encounters.size - 5
-            val copEncounters = encounters
+            //println("diff: " + a0_diff)
+            //println("diff: " + a1_diff)
+
+            d_a0 = ArrayList<Encounter2>()
+            d_a1 = ArrayList<Encounter2>()
+            encounterWindow = ArrayList<Encounter2>()
+
             for (e in encounters) {
                 d_a0.add(e) // add encounter
                 d_a0[d_a0.size - 1].decay += e.decay + a0_diff // change the decay value
 
 
-
                 d_a1.add(e)// add encounter
                 d_a1[d_a1.size - 1].decay = e.decay + a1_diff // change the decay value
 
+            }
+            // used to avoid exeptions in the loop
+            val tmp = encounters.size - 5
+            // val copEncounters = encounters
+            // Calculate the reaction times from activation and compare against observed RTs
+            val start = maxOf(0, tmp)
 
 
-
-                // Calculate the reaction times from activation and compare against observed RTs
-                val start = maxOf(1, tmp)
-                var encounter_window = ArrayList<Encounter2>()
-
-                // remove the first encounters start-1
-                for (a in 0..encounter_window.size-1) {
-                    encounter_window.add(encounters[a])
-                }
+            // remove the first encounters start-1
+            for (a in 0..(encounters.size-1-start)){
+                encounterWindow.add(encounters[start+a])
+            }
+            //println("encounter window: " + encounterWindow)
 
 
+            // now back on track with python file
+            val total_a0_error = calculate_predicted_reaction_time_error(encounterWindow,d_a0, reading_time)
+            val total_a1_error = calculate_predicted_reaction_time_error(encounterWindow, d_a1, reading_time)
 
-                // now back on track with python file
-                val total_a0_error =
-                    calculate_predicted_reaction_time_error(encounter_window, d_a0, reading_time)
-                val total_a1_error =
-                    calculate_predicted_reaction_time_error(encounter_window, d_a1, reading_time)
-
-
-
-                // Adjust the search area based on the lowest total error
-                var ac = (a0 + a1) / 2
-                if (total_a0_error < total_a1_error) {
-                    a1 = ac
-                } else {
-                    a0 = ac
-                }
+            //println("total a0 error: " + total_a0_error)
+            //println("total a1 error: " + total_a1_error)
+            // Adjust the search area based on the lowest total error
+            ac = (a0 + a1) / 2
+            if (total_a0_error < total_a1_error) {
+                a1 = ac
+            } else {
+                a0 = ac
+            }
 
             }
-        }
-        println("estimated alpha is: " + ((a0 + a1) / 2))
+
+
+        //println("estimated alpha is: " + ((a0 + a1) / 2))
         return ((a0 + a1) / 2)
     }
 
@@ -344,14 +369,14 @@ class SpacingModel2 {
         if (include_encounters.size == 0) {
             return Float.NEGATIVE_INFINITY
         }
-
+      //  println("included encounters: " + include_encounters.size)
         var activation = 0F
         for (e in include_encounters) {
-
+           // println("difference in time: " + (current_time - e.time))
             activation += (((current_time - e.time) / 1000).toFloat().pow(-e.decay))
-            println("show activation of all encounters"+ activation)
+          // println("show activation of all encounters"+ ln(activation))
         }
-        println("final activation"+ activation)
+       //println("final activation"+ ln(activation))
         return ln(activation)
     }
 
@@ -360,29 +385,40 @@ class SpacingModel2 {
             /*
         Calculate the summed absolute difference between observed response times and those predicted based on a decay adjustment.
              */
+
         var activations = ArrayList<Float>()
         for (e in test_set) {
             activations.add(calculate_activation_from_encounters(decay_adjusted_encounters,e.time - 100))
+
         }
+        //println("number of activations: " + activations + " test_set size: "+ test_set.size)
 
         var estimated_rt = ArrayList<Float>()
         for (a in activations) {
             estimated_rt.add(estimate_reaction_time_from_activation(a, reading_time))
+
         }
 
         var rt_errors = 0F
         for(cnt in 0..activations.lastIndex) {
-            rt_errors = test_set[cnt].reaction_time - estimated_rt[cnt]
+           // println("estimated reaction time activation" + activations[cnt])
+            //println("2: estimated_rt: " + estimated_rt[cnt])
+            //println("2: reaction time: " + test_set[cnt].reaction_time)
+            rt_errors += (test_set[cnt].reaction_time - estimated_rt[cnt]).absoluteValue
         }
+
         return rt_errors
     }
 
 
-    fun estimate_reaction_time_from_activation(activation:Float, reading_time:Float):Float{
+    fun estimate_reaction_time_from_activation(_activation:Float, reading_time:Float):Float{
         /*
         Calculate an estimated reaction time given a fact's activation and the expected reading time
          */
-        return((this.F * exp(-activation) + (reading_time / 1000)) * 1000).toFloat() // add 500 ms at the end because input takes longer
+        //println("estimated reaction time" + activation)
+        var activation = _activation
+        //println("infinity?: " + exp(-activation))
+        return((F * exp(-activation) + (reading_time / 1000)) * 1000)+500.toFloat() // add 500 ms at the end because input takes longer
     }
 
     fun get_max_reaction_time_for_fact(fact:Fact):Float {
@@ -419,6 +455,6 @@ class SpacingModel2 {
             rt = 6000F
         }
         val max_rt = get_max_reaction_time_for_fact(response.fact)
-        return (minOf(rt, max_rt))
+        return (maxOf(rt, max_rt))
     }
 }
